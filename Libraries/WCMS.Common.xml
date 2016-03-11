@@ -1,0 +1,347 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WCMS.Common</name>
+    </assembly>
+    <members>
+        <member name="M:WCMS.Common.PasswordComplexityRequirement.CheckComplexity(System.String)">
+            <summary>
+            Returns true if the Password passed the check.
+            </summary>
+            <param name="password"></param>
+            <param name="minChars"></param>
+            <param name="requireLetter"></param>
+            <param name="requireNumber"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WCMS.Common.Utilities.SmtpHelper">
+            <summary>
+            Represents WCMS.Misc.Messaging class
+            </summary>
+        </member>
+        <member name="M:WCMS.Common.Utilities.SmtpHelper.#ctor">
+            <summary>
+            Initializes a new instance of the WCMS.Common.Utilities.SmtpHelper class.
+            </summary>
+        </member>
+        <member name="M:WCMS.Common.Utilities.SmtpHelper.#ctor(System.String,System.Int32)">
+            <summary>
+            Initializes a new instance of the WCMS.Common.Utilities.SmtpHelper class.
+            </summary>
+            <param name="smtpServer">Name or IP Address of the SMTP Server to be used for sending e-mail.</param>
+            <param name="smtpPort">Port to be used for sending e-mail</param>
+        </member>
+        <member name="M:WCMS.Common.Utilities.SmtpHelper.#ctor(System.String,System.Int32,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the WCMS.Common.Utilities.SmtpHelper class.
+            </summary>
+            <param name="smtpServer">Name or IP Address of the SMTP Server to be used for sending e-mail.</param>
+            <param name="smtpPort">Port to be used for sending e-mail</param>
+        </member>
+        <member name="M:WCMS.Common.Utilities.SmtpHelper.#ctor(System.String,System.Int32,System.String,System.Int32)">
+            <summary>
+            Initializes a new instance of the WCMS.Common.Utilities.SmtpHelper class.
+            </summary>
+            <param name="smtpServer">Name or IP Address of the SMTP Server to be used for sending e-mail.</param>
+            <param name="smtpPort">Port to be used for sending e-mail</param>
+            <param name="smsServer">Name or IP Address of the SMS Server to be used for sending SMS.</param>
+            <param name="smsPort">Port to be used for sending SMS.</param>
+        </member>
+        <member name="M:WCMS.Common.Utilities.SmtpHelper.SendMail(System.Int32)">
+            <summary>
+            Sends the Mail Message notification.
+            </summary>
+        </member>
+        <member name="M:WCMS.Common.Utilities.SmtpHelper.SendSMS">
+            <summary>
+            Sends the SMS Message notification.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.SmtpServer">
+            <summary>
+            Gets or sets the Name or IP Address of the SMTP Server to be used for sending e-mail.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.SmtpPort">
+            <summary>
+            Gets or sets the Port to be used for sending e-mail.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.SmsServer">
+            <summary>
+            Gets or sets the Name or IP Address of the SMS Server to be used for sending SMS.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.SmsPort">
+            <summary>
+            Gets or sets the Port to be used for sending SMS.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.MailFrom">
+            <summary>
+            Gets or sets the sender of the Mail Message.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.DisplayName">
+            <summary>
+            Gets or sets the sender's display name of the Mail Message.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.MailTo">
+            <summary>
+            Gets or sets the collection of recipients of the Mail Message.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.MailCC">
+            <summary>
+            Gets or sets the collection of Carbon Copy (CC) recipients of the Mail Message.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.MailBCC">
+            <summary>
+            Gets or sets the collection of Blind Carbon Copy (BCC) recipients of the Mail Message.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.Header">
+            <summary>
+            Gets or sets the Header the Mail Message.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.Subject">
+            <summary>
+            Gets or sets the Subject the Mail Message.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.Message">
+            <summary>
+            Gets or sets the Message Body the Mail Message.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.SmsFrom">
+            <summary>
+            Gets or sets the sender of the SMS Message.
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.SmtpHelper.SmsTo">
+            <summary>
+            Gets or sets the collection of recipients of the SMS Message.
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.ConfigHelper">
+            <summary>
+            Summary description for ConfigHelper
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.DataHelper">
+            <summary>
+            Summary description for DataHelper
+            </summary>
+        </member>
+        <member name="M:WCMS.Common.Utilities.DataHelper.Shuffle``1(``0[])">
+            <summary>
+            Shuffle the array.
+            </summary>
+            <typeparam name="T">Array element type.</typeparam>
+            <param name="array">Array to shuffle.</param>
+        </member>
+        <member name="T:WCMS.Common.Utilities.DateTimeHelper">
+            <summary>
+            Summary description for DateTimeHelper
+            </summary>
+        </member>
+        <member name="M:WCMS.Common.Utilities.DateTimeHelper.GetMonthName(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="month">An integer value from 1 to 13 (empty)</param>
+            <returns></returns>
+        </member>
+        <member name="M:WCMS.Common.Utilities.DateTimeHelper.IsOccurring(System.DateTime,System.DateTime,System.TimeSpan)">
+            <summary>
+            Considers only if the refDate is less than or equal to dateToCheck and within range of checkInterval
+            </summary>
+            <param name="refDate">Normally the current date</param>
+            <param name="dateToCheck"></param>
+            <param name="checkInterval"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WCMS.Common.Utilities.FileHelper">
+            <summary>
+            Summary description for FileHelper.
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.LogHelper">
+            <summary>
+            Summary description for LogHelper
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.Misc">
+            <summary>
+            Summary description for Misc
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.QueryParser">
+            <summary>
+            Summary description for QueryStringParser.
+            </summary>
+        </member>
+        <member name="M:WCMS.Common.Utilities.QueryParser.#ctor">
+            <summary>
+            Encode only on Get, not on Set
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.QueryParser.BasePath">
+            <summary>
+            The path starting from /
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.QueryParser.BaseAddress">
+            <summary>
+            DOMAIN:PORT_NUMBER
+            </summary>
+        </member>
+        <member name="P:WCMS.Common.Utilities.QueryParser.HasSourceValue">
+            <summary>
+            Returns true if SourceKey has a value
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.SqlHelper">
+            <summary>
+            The SqlHelper class is intended to encapsulate high performance, 
+            scalable best practices for common uses of SqlClient.
+            </summary>
+        </member>
+        <member name="M:WCMS.Common.Utilities.SqlHelper.CacheParameters(System.String,System.Data.SqlClient.SqlParameter[])">
+            <summary>
+            add parameter array to the cache
+            </summary>
+            <param name="cacheKey">Key to the parameter cache</param>
+            <param name="cmdParms">an array of SqlParamters to be cached</param>
+        </member>
+        <member name="M:WCMS.Common.Utilities.SqlHelper.GetCachedParameters(System.String)">
+            <summary>
+            Retrieve cached parameters
+            </summary>
+            <param name="cacheKey">key used to lookup parameters</param>
+            <returns>Cached SqlParamters array</returns>
+        </member>
+        <member name="M:WCMS.Common.Utilities.SqlHelper.PrepareCommand(System.Data.SqlClient.SqlCommand,System.Data.SqlClient.SqlConnection,System.Data.SqlClient.SqlTransaction,System.Data.CommandType,System.String,System.Data.SqlClient.SqlParameter[])">
+            <summary>
+            Prepare a command for execution
+            </summary>
+            <param name="cmd">SqlCommand object</param>
+            <param name="conn">SqlConnection object</param>
+            <param name="trans">SqlTransaction object</param>
+            <param name="cmdType">Cmd type e.g. stored procedure or text</param>
+            <param name="cmdText">Command text, e.g. Select * from Products</param>
+            <param name="cmdParms">SqlParameters to use in the command</param>
+        </member>
+        <member name="T:WCMS.TextHelper">
+            <summary>
+            Summary description for TextHelper.
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.Substituter">
+            <summary>
+            Performs substition on a string and replaces instances of $(x) values with values obtained by looking up dictionaries 
+            where the key=x.  Formats can also be specified in by specifying the conversion type and format delimited by the pipe character.
+            e.g. $(CurrentDate|System.DateTime|dd-MMM-yyyy)
+            the type can be ommitted if the value is already in the expected type
+            e.g. $(CurrentDate|dd-MMM-yyyy)
+            </summary>    
+            <code>
+            
+                Example using passed Dictionary object for lookup:
+                       string result = Substitutor.Substitute("Hello my name is $(username) and today is $(today|System.DateTime|dd-MMM-yyyy)", myDictionary); 
+            
+                Example using lookupCallback delegate to lookup TaskAgent.TaskParametersCollection:
+                       string result = Substitutor.Substitute("Hello my name is $(username) and today is $(today)", delegate(string name) 
+                       {
+                           if (taskParameters.Contains(name))
+                           {
+                               return taskParameters[name].Value;
+                           }
+                           else
+                           {
+                               return null;
+                           }
+                       } );                  
+            </code>        
+        </member>
+        <member name="M:WCMS.Common.Utilities.Substituter.Substitute(System.String,System.Collections.IDictionary)">
+            <summary>
+            Substitutes $(x) values in stringValue by looking up the values dictionary where key=x
+            </summary>
+            <param name="stringValue">the string to replace $(x) values in</param>
+            <param name="values">The dictionary to look up the replacement values</param>
+            <returns>stringValue with the $(x) values replaced with substitutes when found</returns>
+        </member>
+        <member name="M:WCMS.Common.Utilities.Substituter.Substitute(System.String,WCMS.Common.Utilities.Substituter.ReplacementLookup)">
+            <summary>
+            Substitutes $(x) values in stringValue, the delegate specified in lookupCallback is called for each match allowing
+            custom lookup and formatting to be performed
+            </summary>
+            <param name="stringValue">the string to replace $(x) values in</param>
+            <param name="lookupCallback">Delegate that receives the name of the value to lookup</param>
+            <returns>stringValue with the $(x) values replaced with substitutes when found</returns>
+        </member>
+        <member name="M:WCMS.Common.Utilities.Substituter.Substitute(System.String,WCMS.Common.Utilities.Substituter.ReplacementLookup,System.String,System.String)">
+            <summary>
+            Substitutes $(x) values in stringValue, the delegate specified in lookupCallback is called for each match allowing
+            custom lookup and formatting to be performed
+            </summary>
+            <param name="stringValue">the string to replace $(x) values in</param>
+            <param name="lookupCallback">Delegate that receives the name of the value to lookup</param>
+            <param name="leftEnclose">the left encloser (e.g. '$(')</param>
+            <param name="rightEnclose">the right encloser (e.g. ')')</param>
+            <returns>stringValue with the $(x) values replaced with substitutes when found</returns>
+        </member>
+        <member name="M:WCMS.Common.Utilities.Substituter.Substitute(System.String,System.Collections.IDictionary,System.String,System.String)">
+            <summary>
+            Substitutes $(x) values in stringValue by looking up the values dictionary where key=x
+            </summary>
+            <param name="stringValue">the string to replace $(x) values in</param>
+            <param name="values">The dictionary to look up the replacement values</param>
+            <param name="leftEnclose">the left encloser (e.g. '$(')</param>
+            <param name="rightEnclose">the right encloser (e.g. ')')</param>
+            <returns>stringValue with the $(x) values replaced with substitutes when found</returns>
+        </member>
+        <member name="M:WCMS.Common.Utilities.Substituter.Substitute(System.String,System.String,System.String,System.Text.RegularExpressions.MatchEvaluator)">
+            <summary>
+            Main Substiture methods (others are overloaded versions)
+            </summary>
+            <param name="stringValue">the string to replace $(x) values in</param>
+            <param name="leftEnclose">the left encloser (e.g. '$(')</param>
+            <param name="rightEnclose">the right encloser (e.g. ')')</param>
+            <param name="matchEvaluator">MatchEvaluator delegate to evaluate the match</param>
+            <returns>stringValue with the $(x) values replaced with substitutes when found</returns>
+        </member>
+        <member name="T:WCMS.Common.Utilities.Substituter.BaseMatchEvaluator">
+            <summary>
+            Base object for MatchEvaluators
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.Substituter.DictionaryMatchEvaluator">
+            <summary>
+            MatchEvaluator for looking up values in dictionary
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.Substituter.CustomMatchEvaluator">
+            <summary>
+            Custom Match Evaluator for custom lookups via the ReplacementLookup delegate
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.Substituter.ReplacementLookup">
+            <summary>
+            Delegate for looking up external dictionaries, collections etc allowing formatting etc to be applied
+            </summary>
+            <param name="name">The name of the item to lookup (e.g. if '$(Book)' was the match then the value would be 'Book')</param>
+            <returns>Should return the replacement value, if no match was found then return null to skip the replacement</returns>
+        </member>
+        <member name="T:WCMS.Common.Utilities.Validator">
+            <summary>
+            Summary description for Validator.
+            </summary>
+        </member>
+    </members>
+</doc>

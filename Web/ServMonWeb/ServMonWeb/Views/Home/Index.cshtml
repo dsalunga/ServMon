@@ -1,0 +1,95 @@
+﻿@using WCMS.Common.Utilities
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@*<div class="jumbotron">
+        <h1>ASP.NET</h1>
+        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
+        <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Getting started</h2>
+            <p>
+                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
+                enables a clean separation of concerns and gives you full control over markup
+                for enjoyable, agile development.
+            </p>
+            <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+            <h2>Get more libraries</h2>
+            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
+            <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+            <h2>Web Hosting</h2>
+            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
+            <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+        </div>
+    </div>*@
+
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="page-header">ServMon Dashboard</h1>
+        <div class="btn-group">
+            <button type="button" class="btn btn-@(ViewBag.ServMonRunning ? "success" : "danger") dropdown-toggle" data-toggle="dropdown">
+                Status: <strong>@(ViewBag.ServMonRunning ? "Running" : "Stopped") </strong> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                @if (ViewBag.ServMonRunning)
+                {
+                    <li><a href="@Url.Action("Index", "Home", new { Go = "Start" })"><span class="glyphicon glyphicon-refresh"></span> Restart</a></li>
+                    <li><a href="@Url.Action("Index", "Home", new { Go = "Terminate" })"><span class="glyphicon glyphicon-remove"></span> Terminate</a></li>
+                }
+                else
+                {
+                    <li><a href="@Url.Action("Index", "Home", new { Go = "Start" })"><span class="glyphicon glyphicon-play"></span> Start</a></li>
+                }
+                @if (ViewBag.EnableEditConfig)
+                {
+                    <li class="divider"></li>
+                    <li><a href="@Url.Action("EditConfig", "Home")"><span class="glyphicon glyphicon-pencil"></span> Edit Config</a></li>
+                }
+            </ul>
+        </div>
+        <button class="btn btn-default" onclick="location.href=location.href">Refresh</button>
+        @*<h4>ServMon: <span class="label label-success">Running</span></h4>*@
+    </div>
+    @*<div class="col-md-12">
+            <div>
+                <button class="btn btn-primary">Restart</button>
+                <button class="btn btn-danger">Terminate</button>
+            </div>
+        </div>*@
+    <div class="col-md-12">
+        <h3 style="margin-top: 40px">Services Monitoring</h3>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        @*<th>URL</th>*@
+                        <th>Status</th>
+                        <th>Last Check</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (dynamic service in ViewBag.Services.services)
+                    {
+                        <tr>
+                            <td>@service.name</td>
+                            @*<td>@service.url</td>*@
+                            <td>@Html.Raw((bool)service.success ? "<span class=\"label label-success\">Success</span>" : "<span class=\"label label-danger\">FAILED</span>")</td>
+                            <td>@service.lastUpdate</td>
+                            <td>@service.message</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

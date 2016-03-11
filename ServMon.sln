@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServMon", "Console\ServMon\ServMon.csproj", "{2B689AC8-A03C-496F-BA63-C83A015A07B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServMonWeb", "Web\ServMonWeb\ServMonWeb\ServMonWeb.csproj", "{582E5196-AB7A-4E08-B96E-B589BE2B4401}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServMonWeb.Tests", "Web\ServMonWeb\ServMonWeb.Tests\ServMonWeb.Tests.csproj", "{C35FBCED-1C6A-41B8-9E54-BD41B6F3DE50}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2B689AC8-A03C-496F-BA63-C83A015A07B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B689AC8-A03C-496F-BA63-C83A015A07B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B689AC8-A03C-496F-BA63-C83A015A07B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B689AC8-A03C-496F-BA63-C83A015A07B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{582E5196-AB7A-4E08-B96E-B589BE2B4401}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{582E5196-AB7A-4E08-B96E-B589BE2B4401}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{582E5196-AB7A-4E08-B96E-B589BE2B4401}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{582E5196-AB7A-4E08-B96E-B589BE2B4401}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C35FBCED-1C6A-41B8-9E54-BD41B6F3DE50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C35FBCED-1C6A-41B8-9E54-BD41B6F3DE50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C35FBCED-1C6A-41B8-9E54-BD41B6F3DE50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C35FBCED-1C6A-41B8-9E54-BD41B6F3DE50}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

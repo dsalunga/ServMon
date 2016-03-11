@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Services>
+  <Settings>
+    <!--<Interval>30</Interval>-->
+    <Interval>1800</Interval>
+    <Mail>
+      <Host>smtp.gmail.com</Host>
+      <Port>587</Port>
+      <From>sender01@gmail.com</From>
+      <To>to01@live.com</To>
+      <Password>somepwd</Password>
+      <EnableSsl>true</EnableSsl>
+      <IsBodyHtml>true</IsBodyHtml>
+    </Mail>
+    <Sms>
+      <To>+6588880000</To>
+      <Enabled>true</Enabled>
+      <FromNumber>+6588998877</FromNumber>
+      <FromName>SrvMon</FromName>
+      <Url>https://rest.nexmo.com/sms/json?api_key=somekey&amp;api_secret=somesecret&amp;from=$(From)&amp;to=$(Number)&amp;text=$(Message)</Url>
+    </Sms>
+  </Settings>
+  <Service>
+    <Name>Some Email Web</Name>
+    <Url>http://mail.someorg.sg</Url>
+    <Type>HTTP</Type>
+    <Enabled>1</Enabled>
+    <Content>Password</Content>
+    <ToEmails>someemail@gmail.com,someemail@someorg.sg</ToEmails>
+    <ToNumbers></ToNumbers>
+    <EnableSms>true</EnableSms>
+    <!--<Interval>2</Interval>-->
+  </Service>
+  <Service>
+    <Name>Web Portal</Name>
+    <Url>http://someorg.org</Url>
+    <Type>HTTP</Type>
+    <Enabled>1</Enabled>
+    <Content>Sign In</Content>
+  </Service>
+  <Service>
+    <Name>Some Web System</Name>
+    <Url>http://somewebsystem.org</Url>
+    <Type>HTTP</Type>
+    <Enabled>1</Enabled>
+    <Content>Password</Content>
+  </Service>
+  <Service>
+    <Name>HTTP FTP Web</Name>
+    <Url>http://something.org</Url>
+    <Type>HTTP</Type>
+    <Enabled>1</Enabled>
+    <Content>Description</Content>
+  </Service>
+  <Service>
+    <Name>Some Ftp</Name>
+    <Url>ftp://ftp.someorg.org/pub/SOMETHING/FILES</Url>
+    <Type>FTP</Type>
+    <Enabled>1</Enabled>
+    <Content>Some_Content</Content>
+    <Username>username1</Username>
+    <Password>password01</Password>
+  </Service>
+</Services>
