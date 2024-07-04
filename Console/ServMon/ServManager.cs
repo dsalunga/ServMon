@@ -29,19 +29,19 @@ namespace ServMon
             var settingsNode = xdoc.SelectSingleNode("//Services/Settings");
 
             Items = new Dictionary<string, IServiceType>();
-            Interval = DataHelper.GetInt32(XmlUtil.GetValue(settingsNode, "Interval"), 60 * 60);
+            Interval = DataUtil.GetInt32(XmlUtil.GetValue(settingsNode, "Interval"), 60 * 60);
 
             var mailNode = settingsNode.SelectSingleNode("Mail");
-            MailSettings.EnableSsl = DataHelper.GetBool(XmlUtil.GetValue(mailNode, "EnableSsl"), true);
-            MailSettings.Port = DataHelper.GetInt32(XmlUtil.GetValue(mailNode, "Port"), 587);
-            MailSettings.IsBodyHtml = DataHelper.GetBool(XmlUtil.GetValue(mailNode, "IsBodyHtml"), true);
+            MailSettings.EnableSsl = DataUtil.GetBool(XmlUtil.GetValue(mailNode, "EnableSsl"), true);
+            MailSettings.Port = DataUtil.GetInt32(XmlUtil.GetValue(mailNode, "Port"), 587);
+            MailSettings.IsBodyHtml = DataUtil.GetBool(XmlUtil.GetValue(mailNode, "IsBodyHtml"), true);
             MailSettings.Host = XmlUtil.GetValue(mailNode, "Host");
             MailSettings.From = XmlUtil.GetValue(mailNode, "From");
             MailSettings.To = XmlUtil.GetValue(mailNode, "To");
             MailSettings.Password = XmlUtil.GetValue(mailNode, "Password");
 
             var smsNode = settingsNode.SelectSingleNode("Sms");
-            SmsSettings.Enabled = DataHelper.GetBool(XmlUtil.GetValue(smsNode, "Enabled"), false);
+            SmsSettings.Enabled = DataUtil.GetBool(XmlUtil.GetValue(smsNode, "Enabled"), false);
             SmsSettings.Url = XmlUtil.GetValue(smsNode, "Url");
             SmsSettings.To = XmlUtil.GetValue(smsNode, "To");
             SmsSettings.FromName = XmlUtil.GetValue(smsNode, "FromName");
@@ -55,6 +55,7 @@ namespace ServMon
                 switch (type)
                 {
                     case ServTypes.HTTP:
+                    case ServTypes.HTTPS:
                         service = new HttpService();
                         break;
 
@@ -67,14 +68,14 @@ namespace ServMon
                 {
                     service.Name = XmlUtil.GetValue(node, "Name");
                     service.Url = XmlUtil.GetValue(node, "Url");
-                    service.Enabled = DataHelper.GetBool(XmlUtil.GetValue(node, "Enabled"), true);
+                    service.Enabled = DataUtil.GetBool(XmlUtil.GetValue(node, "Enabled"), true);
                     service.Content = XmlUtil.GetValue(node, "Content");
                     service.Username = XmlUtil.GetValue(node, "Username");
                     service.Password = XmlUtil.GetValue(node, "Password");
-                    service.Interval = DataHelper.GetInt32(XmlUtil.GetValue(node, "Interval"), 0);
+                    service.Interval = DataUtil.GetInt32(XmlUtil.GetValue(node, "Interval"), 0);
                     service.ToEmails = XmlUtil.GetValue(node, "ToEmails");
                     service.ToNumbers = XmlUtil.GetValue(node, "ToNumbers");
-                    service.EnableSms = DataHelper.GetBool(XmlUtil.GetValue(node, "EnableSms"), true);
+                    service.EnableSms = DataUtil.GetBool(XmlUtil.GetValue(node, "EnableSms"), true);
                     Items.Add(service.Name, service);
                 }
             }

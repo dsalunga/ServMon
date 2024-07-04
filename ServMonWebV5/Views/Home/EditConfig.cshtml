@@ -1,0 +1,29 @@
+﻿@model ServMonWebV4.Models.EditConfigViewModel
+@{
+    ViewBag.Title = "Edit Config";
+}
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("EditConfig", "Home", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+            @Html.AntiForgeryToken()
+            <h1 class="page-header">Edit Config</h1>
+            @*<h2>@ViewBag.Title.</h2>
+                <h3>@ViewBag.Message</h3>
+
+                <p>Use this area to provide additional information.</p>*@
+            @Html.ValidationSummary("", new { @class = "text-danger" })
+            <div class="form-group">
+                <div class="col-md-12">
+                        @Html.TextAreaFor(m => m.Content, new { @class = "form-control", @rows = 18, @style = "font-family: Menlo,Monaco,Consolas,Courier New,monospace" })
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-12">
+                    <button class="btn btn-primary">Update</button>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-default">Cancel</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

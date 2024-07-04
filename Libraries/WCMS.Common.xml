@@ -47,16 +47,6 @@
             <param name="smsServer">Name or IP Address of the SMS Server to be used for sending SMS.</param>
             <param name="smsPort">Port to be used for sending SMS.</param>
         </member>
-        <member name="M:WCMS.Common.Utilities.SmtpHelper.SendMail(System.Int32)">
-            <summary>
-            Sends the Mail Message notification.
-            </summary>
-        </member>
-        <member name="M:WCMS.Common.Utilities.SmtpHelper.SendSMS">
-            <summary>
-            Sends the SMS Message notification.
-            </summary>
-        </member>
         <member name="P:WCMS.Common.Utilities.SmtpHelper.SmtpServer">
             <summary>
             Gets or sets the Name or IP Address of the SMTP Server to be used for sending e-mail.
@@ -127,36 +117,46 @@
             Gets or sets the collection of recipients of the SMS Message.
             </summary>
         </member>
-        <member name="T:WCMS.Common.Utilities.ConfigHelper">
+        <member name="M:WCMS.Common.Utilities.SmtpHelper.SendMail(System.Int32)">
+            <summary>
+            Sends the Mail Message notification.
+            </summary>
+        </member>
+        <member name="M:WCMS.Common.Utilities.SmtpHelper.SendSMS">
+            <summary>
+            Sends the SMS Message notification.
+            </summary>
+        </member>
+        <member name="T:WCMS.Common.Utilities.ConfigUtil">
             <summary>
             Summary description for ConfigHelper
             </summary>
         </member>
-        <member name="T:WCMS.Common.Utilities.DataHelper">
+        <member name="T:WCMS.Common.Utilities.DataUtil">
             <summary>
             Summary description for DataHelper
             </summary>
         </member>
-        <member name="M:WCMS.Common.Utilities.DataHelper.Shuffle``1(``0[])">
+        <member name="M:WCMS.Common.Utilities.DataUtil.Shuffle``1(``0[])">
             <summary>
             Shuffle the array.
             </summary>
             <typeparam name="T">Array element type.</typeparam>
             <param name="array">Array to shuffle.</param>
         </member>
-        <member name="T:WCMS.Common.Utilities.DateTimeHelper">
+        <member name="T:WCMS.Common.Utilities.TimeUtil">
             <summary>
             Summary description for DateTimeHelper
             </summary>
         </member>
-        <member name="M:WCMS.Common.Utilities.DateTimeHelper.GetMonthName(System.Int32)">
+        <member name="M:WCMS.Common.Utilities.TimeUtil.GetMonthName(System.Int32)">
             <summary>
             
             </summary>
             <param name="month">An integer value from 1 to 13 (empty)</param>
             <returns></returns>
         </member>
-        <member name="M:WCMS.Common.Utilities.DateTimeHelper.IsOccurring(System.DateTime,System.DateTime,System.TimeSpan)">
+        <member name="M:WCMS.Common.Utilities.TimeUtil.IsOccurring(System.DateTime,System.DateTime,System.TimeSpan)">
             <summary>
             Considers only if the refDate is less than or equal to dateToCheck and within range of checkInterval
             </summary>
@@ -169,6 +169,29 @@
             <summary>
             Summary description for FileHelper.
             </summary>
+        </member>
+        <member name="M:WCMS.Common.Utilities.ImageUtil.GenerateThumbnail(System.String,System.String,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Maintains the aspect ratio of the thumbnail
+            </summary>
+            <param name="sourceImage"></param>
+            <param name="targetImage"></param>
+            <param name="maxWidth"></param>
+            <param name="maxHeight"></param>
+            <param name="fixOrientation"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WCMS.Common.Utilities.ImageUtil.GenerateThumbnail(System.String,System.String,System.Int32,System.Int32,System.Drawing.Imaging.ImageFormat,System.Boolean)">
+            <summary>
+            Uses the thumbnail sizes as is
+            </summary>
+            <param name="source"></param>
+            <param name="thumbnail"></param>
+            <param name="thumbWidth"></param>
+            <param name="thumbHeight"></param>
+            <param name="format"></param>
+            <param name="fixOrientation"></param>
+            <returns></returns>
         </member>
         <member name="T:WCMS.Common.Utilities.LogHelper">
             <summary>
@@ -235,11 +258,6 @@
             <param name="cmdType">Cmd type e.g. stored procedure or text</param>
             <param name="cmdText">Command text, e.g. Select * from Products</param>
             <param name="cmdParms">SqlParameters to use in the command</param>
-        </member>
-        <member name="T:WCMS.TextHelper">
-            <summary>
-            Summary description for TextHelper.
-            </summary>
         </member>
         <member name="T:WCMS.Common.Utilities.Substituter">
             <summary>
@@ -341,6 +359,11 @@
         <member name="T:WCMS.Common.Utilities.Validator">
             <summary>
             Summary description for Validator.
+            </summary>
+        </member>
+        <member name="T:WCMS.TextHelper">
+            <summary>
+            Summary description for TextHelper.
             </summary>
         </member>
     </members>

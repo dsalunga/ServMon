@@ -14,6 +14,9 @@ namespace ServMon
         {
             PreExecute();
 
+            // Ignore invalid SSL certificates
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
             var callSuccess = false;
             var text = string.Empty;
             var response = new ServResponse();

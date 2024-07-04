@@ -1,0 +1,46 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "582e5196-ab7a-4e08-b96e-b589be2b4401": {
+      "ProjectGuid": "582e5196-ab7a-4e08-b96e-b589be2b4401",
+      "DisplayName": "ServMonWeb",
+      "ColorIndex": 0
+    },
+    "2b689ac8-a03c-496f-ba63-c83a015a07b5": {
+      "ProjectGuid": "2b689ac8-a03c-496f-ba63-c83a015a07b5",
+      "DisplayName": "ServMon",
+      "ColorIndex": 1
+    },
+    "4de80654-dfc8-4a09-9e6e-281f6b46a505": {
+      "ProjectGuid": "4de80654-dfc8-4a09-9e6e-281f6b46a505",
+      "DisplayName": "ServMonWebV2",
+      "ColorIndex": 2
+    },
+    "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3": {
+      "ProjectGuid": "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3",
+      "DisplayName": "Miscellaneous Files",
+      "ColorIndex": -1
+    },
+    "9fa6220a-61fa-4373-a4ed-381c99f72b90": {
+      "ProjectGuid": "9fa6220a-61fa-4373-a4ed-381c99f72b90",
+      "DisplayName": "ServMonV3",
+      "ColorIndex": 3
+    },
+    "881ca925-bda8-4e67-b05b-e21b79aad40c": {
+      "ProjectGuid": "881ca925-bda8-4e67-b05b-e21b79aad40c",
+      "DisplayName": "ServMonWebV3",
+      "ColorIndex": 4
+    },
+    "c35fbced-1c6a-41b8-9e54-bd41b6f3de50": {
+      "ProjectGuid": "c35fbced-1c6a-41b8-9e54-bd41b6f3de50",
+      "DisplayName": "ServMonWeb.Tests",
+      "ColorIndex": 5
+    },
+    "da1fd07b-abb9-457c-8692-7bbcc49d946e": {
+      "ProjectGuid": "da1fd07b-abb9-457c-8692-7bbcc49d946e",
+      "DisplayName": "ServMonWebV4",
+      "ColorIndex": 6
+    }
+  },
+  "NextColorIndex": 7
+}

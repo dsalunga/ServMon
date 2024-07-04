@@ -24,7 +24,7 @@
     <Name>Some Email Web</Name>
     <Url>http://mail.someorg.sg</Url>
     <Type>HTTP</Type>
-    <Enabled>1</Enabled>
+    <Enabled>0</Enabled>
     <Content>Password</Content>
     <ToEmails>someemail@gmail.com,someemail@someorg.sg</ToEmails>
     <ToNumbers></ToNumbers>
@@ -35,28 +35,28 @@
     <Name>Web Portal</Name>
     <Url>http://someorg.org</Url>
     <Type>HTTP</Type>
-    <Enabled>1</Enabled>
+    <Enabled>0</Enabled>
     <Content>Sign In</Content>
   </Service>
   <Service>
     <Name>Some Web System</Name>
     <Url>http://somewebsystem.org</Url>
     <Type>HTTP</Type>
-    <Enabled>1</Enabled>
+    <Enabled>0</Enabled>
     <Content>Password</Content>
   </Service>
   <Service>
     <Name>HTTP FTP Web</Name>
     <Url>http://something.org</Url>
     <Type>HTTP</Type>
-    <Enabled>1</Enabled>
+    <Enabled>0</Enabled>
     <Content>Description</Content>
   </Service>
   <Service>
     <Name>Some Ftp</Name>
     <Url>ftp://ftp.someorg.org/pub/SOMETHING/FILES</Url>
     <Type>FTP</Type>
-    <Enabled>1</Enabled>
+    <Enabled>0</Enabled>
     <Content>Some_Content</Content>
     <Username>username1</Username>
     <Password>password01</Password>

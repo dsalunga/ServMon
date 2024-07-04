@@ -45,71 +45,74 @@ namespace ServMon
                 var items = ServManager.Instance.Items;
                 foreach (var item in items)
                 {
-                    var workerThread = new Thread(() =>
+                    if (item.Value.Enabled)
                     {
-                        bool smsSent = false; // SMS won't be sent successively, will always skip one instance for consecutive failures.
-                        while (true)
+                        var workerThread = new Thread(() =>
                         {
-                            var serv = item.Value;
-                            //Console.WriteLine();
-                            Console.WriteLine("{0}: Started", serv.Name);
-
-                            var success = serv.Success;
-                            var response = serv.Execute();
-                            if (!response.Success)
+                            bool smsSent = false; // SMS won't be sent successively, will always skip one instance for consecutive failures.
+                            while (true)
                             {
-                                if (!string.IsNullOrEmpty(response.Message))
-                                    Console.WriteLine("{0}: FAILED. {1}", serv.Name, response.Message);
-                                else
-                                    Console.WriteLine("{0}: FAILED.", serv.Name);
-                                var mail = new MailSender();
-                                mail.Subject = string.Format("MCGI ServMon: {0} - Check FAILED", serv.Name);
-                                mail.Message = string.Format("Service: {0}<br/>Time: {1}<br/>Error: {2}<br/><br/>Trace: {3}", serv.Name, serv.LastUpdate, response.Message, response.StackTrace);
-                                mail.To = (ServManager.Instance.MailSettings.To + "," + serv.ToEmails).Trim().TrimEnd(',');
-                                mail.Send();
-                                Console.WriteLine("{0}: Email sent to {1}", serv.Name, mail.To);
+                                var serv = item.Value;
+                                //Console.WriteLine();
+                                Console.WriteLine("{0}: Started", serv.Name);
 
-                                var smsTo = (ServManager.Instance.SmsSettings.To + "," + serv.ToNumbers).Trim().TrimEnd(',');
-                                if (ServManager.Instance.SmsSettings.Enabled && serv.EnableSms && !string.IsNullOrEmpty(smsTo))
+                                var success = serv.Success;
+                                var response = serv.Execute();
+                                if (!response.Success)
                                 {
-                                    if (!smsSent)
-                                    {
-                                        var sms = new SmsSender();
-                                        sms.To = smsTo;
-                                        sms.Message = string.Format("{0} - FAILED, pls chk. %0AError: {1}", serv.Name, response.Message);
-                                        sms.Send();
-
-                                        Console.WriteLine("{0}: SMS sent to {1}", serv.Name, smsTo);
-                                        smsSent = true;
-                                    }
+                                    if (!string.IsNullOrEmpty(response.Message))
+                                        Console.WriteLine("{0}: FAILED. {1}", serv.Name, response.Message);
                                     else
+                                        Console.WriteLine("{0}: FAILED.", serv.Name);
+                                    var mail = new MailSender();
+                                    mail.Subject = string.Format("ServMon: {0} - Check FAILED", serv.Name);
+                                    mail.Message = string.Format("Service: {0}<br/>Time: {1}<br/>Error: {2}<br/><br/>Trace: {3}", serv.Name, serv.LastUpdate, response.Message, response.StackTrace);
+                                    mail.To = (ServManager.Instance.MailSettings.To + "," + serv.ToEmails).Trim().TrimEnd(',');
+                                    mail.Send();
+                                    Console.WriteLine("{0}: Email sent to {1}", serv.Name, mail.To);
+
+                                    var smsTo = (ServManager.Instance.SmsSettings.To + "," + serv.ToNumbers).Trim().TrimEnd(',');
+                                    if (ServManager.Instance.SmsSettings.Enabled && serv.EnableSms && !string.IsNullOrEmpty(smsTo))
                                     {
-                                        smsSent = false;
+                                        if (!smsSent)
+                                        {
+                                            var sms = new SmsSender();
+                                            sms.To = smsTo;
+                                            sms.Message = string.Format("{0} - FAILED, pls chk. %0AError: {1}", serv.Name, response.Message);
+                                            sms.Send();
+
+                                            Console.WriteLine("{0}: SMS sent to {1}", serv.Name, smsTo);
+                                            smsSent = true;
+                                        }
+                                        else
+                                        {
+                                            smsSent = false;
+                                        }
                                     }
                                 }
+                                else
+                                {
+                                    Console.WriteLine("{0}: Success!", serv.Name);
+                                    smsSent = false;
+                                }
+
+                                if (success != response.Success)
+                                {
+                                    // Change in status, write state to json file
+                                    writeState = true;
+                                }
+
+                                //Console.WriteLine("{0}: Sleeping...", serv.Name);
+                                Sleep(serv.Interval);
                             }
-                            else
-                            {
-                                Console.WriteLine("{0}: Success!", serv.Name);
-                                smsSent = false;
-                            }
+                        });
 
-                            if (success != response.Success)
-                            {
-                                // Change in status, write state to json file
-                                writeState = true;
-                            }
+                        workerThreads.Add(workerThread);
 
-                            //Console.WriteLine("{0}: Sleeping...", serv.Name);
-                            Sleep(serv.Interval);
-                        }
-                    });
-
-                    workerThreads.Add(workerThread);
-
-                    workerThread.IsBackground = false; // Always dependent to job threads // !forceExecute;
-                    workerThread.SetApartmentState(ApartmentState.STA);
-                    workerThread.Start();
+                        workerThread.IsBackground = false; // Always dependent to job threads // !forceExecute;
+                        workerThread.SetApartmentState(ApartmentState.STA);
+                        workerThread.Start();
+                    }
                 }
 
                 var jsonCheck = 0;
@@ -128,6 +131,7 @@ namespace ServMon
                                             new JProperty("name", i.Name),
                                             new JProperty("lastUpdate", i.LastUpdate),
                                             new JProperty("success", i.Success),
+                                            new JProperty("enabled", i.Enabled),
                                             new JProperty("type", i.Type),
                                             new JProperty("url", i.Url),
                                             new JProperty("message", i.Message)

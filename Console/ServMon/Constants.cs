@@ -10,6 +10,7 @@ namespace ServMon
     {
         HTTP = 1,
         FTP = 2,
-        SMTP = 3
+        SMTP = 3,
+        HTTPS = 4
     }
 }
