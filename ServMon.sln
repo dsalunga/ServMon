@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServMonWeb", "Web\ServMonWe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServMonWeb.Tests", "Web\ServMonWeb\ServMonWeb.Tests\ServMonWeb.Tests.csproj", "{C35FBCED-1C6A-41B8-9E54-BD41B6F3DE50}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServMonWebV4", "ServMonWebV4\ServMonWebV4.csproj", "{DA1FD07B-ABB9-457C-8692-7BBCC49D946E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServMonWebCore", "ServMonWebV4\ServMonWebCore.csproj", "{DA1FD07B-ABB9-457C-8692-7BBCC49D946E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServMonWebV5", "ServMonWebV5\ServMonWebV5.csproj", "{C31098FE-4446-433E-96FA-719CE92382BA}"
 EndProject
