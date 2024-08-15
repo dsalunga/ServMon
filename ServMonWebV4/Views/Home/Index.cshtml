@@ -48,7 +48,7 @@
                 <thead>
                     <tr>
                         <th>Service</th>
-                        @*<th>URL</th>*@
+                        <th>URL</th>
                         <th>Status</th>
                         <th>Last Check</th>
                         <th>Message</th>
@@ -61,6 +61,7 @@
                         {
                             <tr>
                                 <td>@service.name</td>
+                                <td>@service.url</td>
                                 <td>@Html.Raw((bool)service.success ? "<span class=\"text-success\">Success</span>" : (bool)service.enabled ? "<span class=\"text-danger\">FAILED</span>" : "<span class=\"text-secondary\">Disabled</span>")</td>
                                 <td>@((bool)service.enabled ? service.lastUpdate : "-")</td>
                                 <td>@service.message</td>
