@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -6,6 +7,7 @@ using ServMonWeb.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,11 +19,13 @@ namespace ServMonWeb.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration configuration;
+        private readonly IWebHostEnvironment hostEnvironment;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IWebHostEnvironment hostEnvironment)
         {
             _logger = logger;
             this.configuration = configuration;
+            this.hostEnvironment = hostEnvironment;
         }
         public IActionResult Privacy()
         {
@@ -48,13 +52,10 @@ namespace ServMonWeb.Controllers
                             foreach (var process in ms)
                                 process.Kill(true);
 
-                        var processPath = configuration.GetSection("appSettings").GetSection("ServMon:ExecutablePath").Value;
+                        var processPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ExecutablePath").Value);
                         var m = new Process();
-                        //m.StartInfo.Arguments = "/interactive";
-                        //m.StartInfo.RedirectStandardInput = true;
-                        //m.StartInfo.UseShellExecute = false;
                         m.StartInfo.FileName = processPath;
-                        m.StartInfo.WorkingDirectory = FileHelper.GetFolder(processPath, '\\');
+                        m.StartInfo.WorkingDirectory = Path.GetDirectoryName(processPath) ?? Environment.CurrentDirectory;
                         m.Start();
 
                         return RedirectToAction("Index", "Home");
@@ -69,7 +70,7 @@ namespace ServMonWeb.Controllers
                     }
                 default:
                     {
-                        var jsonPath = configuration.GetSection("appSettings").GetSection("ServMon:ServicesJsonPath").Value; //ConfigHelper.Get("ServMon:ServicesJsonPath");
+                        var jsonPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ServicesJsonPath").Value); //ConfigHelper.Get("ServMon:ServicesJsonPath");
                         //jsonPath = WebHelper.MapPath(jsonPath, true);
                         var jsonContent = FileHelper.ReadFile(jsonPath);
                         if (!String.IsNullOrEmpty(jsonContent))
@@ -91,7 +92,7 @@ namespace ServMonWeb.Controllers
 
         public ActionResult EditConfig()
         {
-            var configPath = configuration.GetSection("appSettings").GetSection("ServMon:ConfigPath").Value;
+            var configPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ConfigPath").Value);
             configPath = FileHelper.EvalPath(configPath, false);
 
             var model = new EditConfigViewModel();
@@ -116,7 +117,7 @@ namespace ServMonWeb.Controllers
                 //    return View(model);
                 //}
 
-                var configPath = configuration.GetSection("appSettings").GetSection("ServMon:ConfigPath").Value;
+                var configPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ConfigPath").Value);
                 configPath = FileHelper.EvalPath(configPath, false);
 
                 System.IO.File.Copy(configPath, configPath + ".bak", true);
@@ -134,6 +135,44 @@ namespace ServMonWeb.Controllers
 
             // If we got this far, something failed, redisplay form
             return View(model);
+        }
+
+        private string ResolveConfiguredPath(string configuredPath)
+        {
+            if (string.IsNullOrWhiteSpace(configuredPath))
+            {
+                return configuredPath;
+            }
+
+            if (Path.IsPathRooted(configuredPath))
+            {
+                return configuredPath;
+            }
+
+            var candidates = new List<string>();
+            var contentRoot = hostEnvironment.ContentRootPath;
+            if (!string.IsNullOrWhiteSpace(contentRoot))
+            {
+                candidates.Add(Path.GetFullPath(Path.Combine(contentRoot, configuredPath)));
+
+                var parent = Directory.GetParent(contentRoot)?.FullName;
+                if (!string.IsNullOrWhiteSpace(parent))
+                {
+                    candidates.Add(Path.GetFullPath(Path.Combine(parent, configuredPath)));
+                }
+            }
+
+            candidates.Add(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, configuredPath)));
+
+            foreach (var candidate in candidates.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (System.IO.File.Exists(candidate) || Directory.Exists(candidate))
+                {
+                    return candidate;
+                }
+            }
+
+            return candidates.First();
         }
     }
 }

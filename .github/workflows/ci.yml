@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore ServMon.sln
+
+      - name: Build
+        run: dotnet build ServMon.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test ServMon.sln -c Release --no-build --verbosity normal
+
+      - name: Publish Console
+        run: dotnet publish Console/ServMon/ServMon.csproj -c Release --no-build -o artifacts/console
+
+      - name: Publish WebApp
+        run: dotnet publish WebApp/ServMonWeb.csproj -c Release --no-build -o artifacts/webapp
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: servmon-${{ matrix.os }}
+          path: artifacts/

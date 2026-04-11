@@ -12,117 +12,119 @@ namespace ServMon
     class Program
     {
         /// <summary>
-        /// Sleep interval in minutes.
+        /// Sleep interval in seconds.
         /// </summary>
         private static int execInterval;
-        private static bool writeState = true;
+        private static volatile bool writeState = true;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var workerThreads = new List<Thread>();
+            using var cts = new CancellationTokenSource();
+            var token = cts.Token;
 
-            Console.WriteLine("ServMon started. Press ENTER to stop.");
+            Console.CancelKeyPress += (_, e) =>
+            {
+                e.Cancel = true;
+                cts.Cancel();
+            };
+
+            Console.WriteLine("ServMon started. Press Ctrl+C to stop.");
             Console.WriteLine();
 
-            var schedulerThread = new Thread(() =>
+            try
             {
-                try
-                {
-                    ServManager.Instance.ReadConfig();
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLog(true, ex);
-                    return;
-                }
+                ServManager.Instance.ReadConfig();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLog(true, ex);
+                return;
+            }
 
-                execInterval = ServManager.Instance.Interval;
+            execInterval = ServManager.Instance.Interval;
 
-                Console.WriteLine("Default exec interval: {0} seconds", execInterval);
-                Console.WriteLine("Begin instrumentation...");
-                Console.WriteLine();
+            Console.WriteLine("Default exec interval: {0} seconds", execInterval);
+            Console.WriteLine("Begin instrumentation...");
+            Console.WriteLine();
 
-                var items = ServManager.Instance.Items;
-                foreach (var item in items)
+            var items = ServManager.Instance.Items;
+            var workerTasks = new List<Task>();
+
+            foreach (var item in items)
+            {
+                if (item.Value.Enabled)
                 {
-                    if (item.Value.Enabled)
+                    var serv = item.Value;
+                    var task = Task.Run(async () =>
                     {
-                        var workerThread = new Thread(() =>
+                        bool smsSent = false;
+                        while (!token.IsCancellationRequested)
                         {
-                            bool smsSent = false; // SMS won't be sent successively, will always skip one instance for consecutive failures.
-                            while (true)
+                            Console.WriteLine("{0}: Started", serv.Name);
+
+                            var success = serv.Success;
+                            var response = serv.Execute();
+                            if (!response.Success)
                             {
-                                var serv = item.Value;
-                                //Console.WriteLine();
-                                Console.WriteLine("{0}: Started", serv.Name);
+                                if (!string.IsNullOrEmpty(response.Message))
+                                    Console.WriteLine("{0}: FAILED. {1}", serv.Name, response.Message);
+                                else
+                                    Console.WriteLine("{0}: FAILED.", serv.Name);
+                                var mail = new MailSender();
+                                mail.Subject = string.Format("ServMon: {0} - Check FAILED", serv.Name);
+                                mail.Message = string.Format("Service: {0}<br/>Time: {1}<br/>Error: {2}<br/><br/>Trace: {3}", serv.Name, serv.LastUpdate, response.Message, response.StackTrace);
+                                mail.To = (ServManager.Instance.MailSettings.To + "," + serv.ToEmails).Trim().TrimEnd(',');
+                                mail.Send();
+                                Console.WriteLine("{0}: Email sent to {1}", serv.Name, mail.To);
 
-                                var success = serv.Success;
-                                var response = serv.Execute();
-                                if (!response.Success)
+                                var smsTo = (ServManager.Instance.SmsSettings.To + "," + serv.ToNumbers).Trim().TrimEnd(',');
+                                if (ServManager.Instance.SmsSettings.Enabled && serv.EnableSms && !string.IsNullOrEmpty(smsTo))
                                 {
-                                    if (!string.IsNullOrEmpty(response.Message))
-                                        Console.WriteLine("{0}: FAILED. {1}", serv.Name, response.Message);
-                                    else
-                                        Console.WriteLine("{0}: FAILED.", serv.Name);
-                                    var mail = new MailSender();
-                                    mail.Subject = string.Format("ServMon: {0} - Check FAILED", serv.Name);
-                                    mail.Message = string.Format("Service: {0}<br/>Time: {1}<br/>Error: {2}<br/><br/>Trace: {3}", serv.Name, serv.LastUpdate, response.Message, response.StackTrace);
-                                    mail.To = (ServManager.Instance.MailSettings.To + "," + serv.ToEmails).Trim().TrimEnd(',');
-                                    mail.Send();
-                                    Console.WriteLine("{0}: Email sent to {1}", serv.Name, mail.To);
-
-                                    var smsTo = (ServManager.Instance.SmsSettings.To + "," + serv.ToNumbers).Trim().TrimEnd(',');
-                                    if (ServManager.Instance.SmsSettings.Enabled && serv.EnableSms && !string.IsNullOrEmpty(smsTo))
+                                    if (!smsSent)
                                     {
-                                        if (!smsSent)
-                                        {
-                                            var sms = new SmsSender();
-                                            sms.To = smsTo;
-                                            sms.Message = string.Format("{0} - FAILED, pls chk. %0AError: {1}", serv.Name, response.Message);
-                                            sms.Send();
+                                        var sms = new SmsSender();
+                                        sms.To = smsTo;
+                                        sms.Message = string.Format("{0} - FAILED, pls chk. %0AError: {1}", serv.Name, response.Message);
+                                        sms.Send();
 
-                                            Console.WriteLine("{0}: SMS sent to {1}", serv.Name, smsTo);
-                                            smsSent = true;
-                                        }
-                                        else
-                                        {
-                                            smsSent = false;
-                                        }
+                                        Console.WriteLine("{0}: SMS sent to {1}", serv.Name, smsTo);
+                                        smsSent = true;
+                                    }
+                                    else
+                                    {
+                                        smsSent = false;
                                     }
                                 }
-                                else
-                                {
-                                    Console.WriteLine("{0}: Success!", serv.Name);
-                                    smsSent = false;
-                                }
-
-                                if (success != response.Success)
-                                {
-                                    // Change in status, write state to json file
-                                    writeState = true;
-                                }
-
-                                //Console.WriteLine("{0}: Sleeping...", serv.Name);
-                                Sleep(serv.Interval);
                             }
-                        });
+                            else
+                            {
+                                Console.WriteLine("{0}: Success!", serv.Name);
+                                smsSent = false;
+                            }
 
-                        workerThreads.Add(workerThread);
+                            if (success != response.Success)
+                            {
+                                writeState = true;
+                            }
 
-                        workerThread.IsBackground = false; // Always dependent to job threads // !forceExecute;
-                        workerThread.SetApartmentState(ApartmentState.STA);
-                        workerThread.Start();
-                    }
+                            await SleepAsync(serv.Interval, token);
+                        }
+                    }, token);
+
+                    workerTasks.Add(task);
                 }
+            }
 
+            // State writer task
+            var stateWriterTask = Task.Run(async () =>
+            {
                 var jsonCheck = 0;
-                while (true)
+                while (!token.IsCancellationRequested)
                 {
                     jsonCheck += 10;
-                    Sleep(10); // Check status changes every 10 seconds
+                    await SleepAsync(10, token);
                     if (writeState || jsonCheck > execInterval)
                     {
-                        // Build Json object
                         var json = new JObject(
                             new JProperty("services",
                                 new JArray(
@@ -144,26 +146,33 @@ namespace ServMon
                         jsonCheck = 0;
                     }
                 }
-            });
-            schedulerThread.IsBackground = false; // Always dependent to job threads // !forceExecute;
-            schedulerThread.SetApartmentState(ApartmentState.STA);
-            schedulerThread.Start();
-            Console.ReadLine();
+            }, token);
 
-            Console.WriteLine("Aborting Threads. Press wait...");
-            // Abort Scheduler Thread
-            schedulerThread.Abort();
-            foreach (var thread in workerThreads)
-                thread.Abort();
+            workerTasks.Add(stateWriterTask);
+
+            try
+            {
+                await Task.WhenAll(workerTasks);
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected on shutdown
+            }
 
             Console.WriteLine();
-            Console.WriteLine("Processing stopped. Press ENTER to exit.");
-            Console.ReadLine();
+            Console.WriteLine("Processing stopped gracefully.");
         }
 
-        private static void Sleep(int interval = -1)
+        private static async Task SleepAsync(int interval, CancellationToken token)
         {
-            Thread.Sleep((interval > 0 ? interval : execInterval) * 1000);
+            try
+            {
+                await Task.Delay((interval > 0 ? interval : execInterval) * 1000, token);
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected on cancellation
+            }
         }
     }
 }

@@ -1,0 +1,13 @@
+Baseline build summary (Phase 0) - 2026-04-12
+SDK: .NET 10.0.103
+OS: macOS (arm64)
+
+Console/ServMon (net8.0): Build succeeded with 7 warnings
+  - SYSLIB0014 x3 (WebRequest.Create obsolete) in HttpService.cs, SmsSender.cs, FtpService.cs
+  - SYSLIB0006 x2 (Thread.Abort obsolete) in Program.cs
+  - CA1416 x2 (SetApartmentState Windows-only) in Program.cs
+
+WebApp/ServMonWeb (net8.0): Build succeeded (0 warnings)
+ServMon.sln (all projects): Build succeeded
+  WCMS.Common (net8.0): OK
+  WCMS.Common.Tests (net10.0): OK

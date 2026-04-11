@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -13,6 +14,8 @@ namespace ServMon
 {
     class SmsSender
     {
+        private static readonly HttpClient _httpClient = new HttpClient();
+
         public string To { get; set; }
         public string Message { get; set; }
 
@@ -21,8 +24,6 @@ namespace ServMon
             var settings = ServManager.Instance.SmsSettings;
             try
             {
-                // Prepare request
-
                 var recipients = To.TrimEnd(',').Split(',');
                 foreach (var r in recipients)
                 {
@@ -35,24 +36,11 @@ namespace ServMon
                         provider.Add("From", settings.GetFrom(recipient));
                         var requestUrl = Substituter.Substitute(settings.Url, provider);
 
-                        var text = string.Empty;
-                        var req = WebRequest.Create(requestUrl);
-                        req.Method = "POST";
-                        req.ContentLength = 0;
-                        //req.Expect = "application/json";
-                        var res = req.GetResponse();
-                        var data = res.GetResponseStream();
-                        using (var sr = new StreamReader(data))
-                        {
-                            text = sr.ReadToEnd();
-                        }
-                        res.Close();
-
-                        // check response ???
+                        using var response = _httpClient.PostAsync(requestUrl, null).GetAwaiter().GetResult();
+                        var text = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                     }
                 }
             }
-            //catch (SmtpFailedRecipientsException) { }
             catch (Exception ex)
             {
                 LogHelper.WriteLog(true, ex);

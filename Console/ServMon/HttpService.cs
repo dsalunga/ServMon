@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,26 +11,28 @@ namespace ServMon
 {
     class HttpService : CommonService
     {
+        private static readonly HttpClient _httpClient;
+
+        static HttpService()
+        {
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            };
+            _httpClient = new HttpClient(handler);
+        }
+
         public override ServResponse Execute()
         {
             PreExecute();
-
-            // Ignore invalid SSL certificates
-            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
             var callSuccess = false;
             var text = string.Empty;
             var response = new ServResponse();
             try
             {
-                var req = WebRequest.Create(Url);
-                var res = req.GetResponse();
-                var data = res.GetResponseStream();
-                using (var sr = new StreamReader(data))
-                {
-                    text = sr.ReadToEnd();
-                }
-                res.Close();
+                using var httpResponse = _httpClient.GetAsync(Url).GetAwaiter().GetResult();
+                text = httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 callSuccess = true;
             }
             catch (Exception ex)

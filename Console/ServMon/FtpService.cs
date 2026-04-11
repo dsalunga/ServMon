@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using FluentFTP;
 using WCMS.Common.Utilities;
 
 namespace ServMon
@@ -18,21 +18,25 @@ namespace ServMon
             var callSuccess = false;
             var text = string.Empty;
             var response = new ServResponse();
-            var path = FtpHelper.UrlEncode(Url);
             try
             {
-                var client = (FtpWebRequest)WebRequest.Create(path);
-                client.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-                client.Proxy = WebRequest.GetSystemWebProxy();
-                client.Credentials = new NetworkCredential(Username, Password);
-                using (var res = client.GetResponse() as FtpWebResponse)
+                var uri = new Uri(Url);
+                var host = uri.Host;
+                var remotePath = Uri.UnescapeDataString(uri.AbsolutePath);
+
+                using var client = new FtpClient(host);
+                if (!string.IsNullOrEmpty(Username))
+                    client.Credentials = new System.Net.NetworkCredential(Username, Password);
+                client.Connect();
+
+                var listing = client.GetListing(remotePath);
+                var sb = new StringBuilder();
+                foreach (var item in listing)
                 {
-                    var reader = new StreamReader(res.GetResponseStream(), System.Text.Encoding.ASCII);
-                    text = reader.ReadToEnd();
-                    reader.Close();
-                    res.Close();
-                    callSuccess = true;
+                    sb.AppendLine(item.FullName);
                 }
+                text = sb.ToString();
+                callSuccess = true;
             }
             catch (Exception ex)
             {

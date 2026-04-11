@@ -163,7 +163,9 @@ namespace ServMonWeb.Data.Migrations
                 table: "AspNetRoles",
                 column: "NormalizedName",
                 unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                filter: ActiveProvider == "Npgsql.EntityFrameworkCore.PostgreSQL"
+                    ? "\"NormalizedName\" IS NOT NULL"
+                    : "[NormalizedName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -190,7 +192,9 @@ namespace ServMonWeb.Data.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
+                filter: ActiveProvider == "Npgsql.EntityFrameworkCore.PostgreSQL"
+                    ? "\"NormalizedUserName\" IS NOT NULL"
+                    : "[NormalizedUserName] IS NOT NULL");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
