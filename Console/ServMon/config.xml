@@ -6,18 +6,18 @@
     <Mail>
       <Host>smtp.gmail.com</Host>
       <Port>587</Port>
-      <From>sender01@gmail.com</From>
-      <To>to01@live.com</To>
-      <Password>somepwd</Password>
+      <From>REPLACE_WITH_SENDER_EMAIL</From>
+      <To>REPLACE_WITH_RECIPIENT_EMAIL</To>
+      <Password>REPLACE_WITH_APP_PASSWORD</Password>
       <EnableSsl>true</EnableSsl>
       <IsBodyHtml>true</IsBodyHtml>
     </Mail>
     <Sms>
-      <To>+6588880000</To>
+      <To>REPLACE_WITH_SMS_RECIPIENT</To>
       <Enabled>true</Enabled>
-      <FromNumber>+6588998877</FromNumber>
+      <FromNumber>REPLACE_WITH_SMS_FROM_NUMBER</FromNumber>
       <FromName>SrvMon</FromName>
-      <Url>https://rest.nexmo.com/sms/json?api_key=somekey&amp;api_secret=somesecret&amp;from=$(From)&amp;to=$(Number)&amp;text=$(Message)</Url>
+      <Url>https://rest.nexmo.com/sms/json?api_key=REPLACE_API_KEY&amp;api_secret=REPLACE_API_SECRET&amp;from=$(From)&amp;to=$(Number)&amp;text=$(Message)</Url>
     </Sms>
   </Settings>
   <Service>
@@ -26,7 +26,7 @@
     <Type>HTTP</Type>
     <Enabled>0</Enabled>
     <Content>Password</Content>
-    <ToEmails>someemail@gmail.com,someemail@someorg.sg</ToEmails>
+    <ToEmails>REPLACE_WITH_RECIPIENT_EMAILS</ToEmails>
     <ToNumbers></ToNumbers>
     <EnableSms>true</EnableSms>
     <!--<Interval>2</Interval>-->
@@ -58,7 +58,7 @@
     <Type>FTP</Type>
     <Enabled>0</Enabled>
     <Content>Some_Content</Content>
-    <Username>username1</Username>
-    <Password>password01</Password>
+    <Username>REPLACE_WITH_FTP_USERNAME</Username>
+    <Password>REPLACE_WITH_FTP_PASSWORD</Password>
   </Service>
 </Services>

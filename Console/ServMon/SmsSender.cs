@@ -14,7 +14,7 @@ namespace ServMon
 {
     class SmsSender
     {
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
 
         public string To { get; set; }
         public string Message { get; set; }

@@ -5,22 +5,30 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ServMon
 {
     class HttpService : CommonService
     {
-        private static readonly HttpClient _httpClient;
+        private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
+
+        private static readonly HttpClient _secureClient;
+        private static readonly HttpClient _insecureClient;
 
         static HttpService()
         {
-            var handler = new HttpClientHandler
+            _secureClient = new HttpClient { Timeout = DefaultTimeout };
+
+            var insecureHandler = new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
             };
-            _httpClient = new HttpClient(handler);
+            _insecureClient = new HttpClient(insecureHandler) { Timeout = DefaultTimeout };
         }
+
+        public bool AllowInsecureTls { get; set; }
 
         public override ServResponse Execute()
         {
@@ -29,11 +37,22 @@ namespace ServMon
             var callSuccess = false;
             var text = string.Empty;
             var response = new ServResponse();
+            var client = AllowInsecureTls ? _insecureClient : _secureClient;
             try
             {
-                using var httpResponse = _httpClient.GetAsync(Url).GetAwaiter().GetResult();
+                using var httpResponse = client.GetAsync(Url).GetAwaiter().GetResult();
+                if (!httpResponse.IsSuccessStatusCode)
+                {
+                    response.Message = $"HTTP {(int)httpResponse.StatusCode} {httpResponse.ReasonPhrase}";
+                    PostExecute(response);
+                    return response;
+                }
                 text = httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 callSuccess = true;
+            }
+            catch (TaskCanceledException)
+            {
+                response.Message = $"Request timed out after {DefaultTimeout.TotalSeconds}s";
             }
             catch (Exception ex)
             {

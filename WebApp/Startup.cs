@@ -27,6 +27,19 @@ namespace ServMonWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Startup-time configuration validation
+            var appSettings = Configuration.GetSection("appSettings");
+            var processName = appSettings["ServMon:ProcessName"];
+            var executablePath = appSettings["ServMon:ExecutablePath"];
+            var servicesJsonPath = appSettings["ServMon:ServicesJsonPath"];
+
+            if (string.IsNullOrWhiteSpace(processName))
+                throw new InvalidOperationException("Configuration error: appSettings:ServMon:ProcessName is required.");
+            if (string.IsNullOrWhiteSpace(executablePath))
+                throw new InvalidOperationException("Configuration error: appSettings:ServMon:ExecutablePath is required.");
+            if (string.IsNullOrWhiteSpace(servicesJsonPath))
+                throw new InvalidOperationException("Configuration error: appSettings:ServMon:ServicesJsonPath is required.");
+
             var databaseProvider = (Configuration["DatabaseProvider"] ?? "Postgres").Trim();
             var defaultConnectionString = Configuration.GetConnectionString("DefaultConnection");
             var postgresConnectionString = Configuration.GetConnectionString("PostgresConnection");
@@ -58,8 +71,16 @@ namespace ServMonWeb
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+            });
+
             services.AddControllersWithViews();
+            services.AddHealthChecks();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -90,6 +111,7 @@ namespace ServMonWeb
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
+                endpoints.MapHealthChecks("/health");
             });
         }
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ using WCMS.Common.Utilities;
 
 namespace ServMonWeb.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -27,11 +29,13 @@ namespace ServMonWeb.Controllers
             this.configuration = configuration;
             this.hostEnvironment = hostEnvironment;
         }
+        [AllowAnonymous]
         public IActionResult Privacy()
         {
             return View();
         }
 
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -40,56 +44,70 @@ namespace ServMonWeb.Controllers
 
 
 
-        public ActionResult Index(string go = "")
+        [HttpGet]
+        public ActionResult Index()
         {
-            go = go.ToLower();
-            switch (go)
+            var jsonPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ServicesJsonPath").Value);
+            var jsonContent = FileHelper.ReadFile(jsonPath);
+            if (!String.IsNullOrEmpty(jsonContent))
             {
-                case "start":
-                    {
-                        var ms = Process.GetProcessesByName(configuration.GetSection("appSettings").GetSection("ServMon:ProcessName").Value);
-                        if (ms.Length > 0)
-                            foreach (var process in ms)
-                                process.Kill(true);
-
-                        var processPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ExecutablePath").Value);
-                        var m = new Process();
-                        m.StartInfo.FileName = processPath;
-                        m.StartInfo.WorkingDirectory = Path.GetDirectoryName(processPath) ?? Environment.CurrentDirectory;
-                        m.Start();
-
-                        return RedirectToAction("Index", "Home");
-                    }
-                case "terminate":
-                    {
-                        var processes = Process.GetProcessesByName(configuration.GetSection("appSettings").GetSection("ServMon:ProcessName").Value);
-                        if (processes.Length > 0)
-                            foreach (Process process in processes)
-                                process.Kill(true);
-                        return RedirectToAction("Index", "Home");
-                    }
-                default:
-                    {
-                        var jsonPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ServicesJsonPath").Value); //ConfigHelper.Get("ServMon:ServicesJsonPath");
-                        //jsonPath = WebHelper.MapPath(jsonPath, true);
-                        var jsonContent = FileHelper.ReadFile(jsonPath);
-                        if (!String.IsNullOrEmpty(jsonContent))
-                        {
-                            var json = JObject.Parse(jsonContent);
-                            ViewBag.Services = json;
-                        }
-
-                        // Process status
-                        var ms = Process.GetProcessesByName(configuration.GetSection("appSettings").GetSection("ServMon:ProcessName").Value);
-                        ViewBag.ServMonRunning = ms.Length > 0;
-                        break;
-                    }
+                var json = JObject.Parse(jsonContent);
+                ViewBag.Services = json;
             }
 
-            ViewBag.EnableEditConfig = true; // DataHelper.GetBool(ConfigHelper.Get("ServMon:EnableEditConfig"), false);
+            // Process status
+            var ms = Process.GetProcessesByName(configuration.GetSection("appSettings").GetSection("ServMon:ProcessName").Value);
+            ViewBag.ServMonRunning = ms.Length > 0;
+
+            ViewBag.EnableEditConfig = true;
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "AdminOnly")]
+        public ActionResult Start()
+        {
+            var processName = configuration.GetSection("appSettings").GetSection("ServMon:ProcessName").Value;
+            var processPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ExecutablePath").Value);
+
+            if (string.IsNullOrWhiteSpace(processPath) || !System.IO.File.Exists(processPath))
+            {
+                _logger.LogError("Agent executable not found at configured path: {Path}", processPath);
+                TempData["Error"] = "Agent executable not found at the configured path.";
+                return RedirectToAction("Index");
+            }
+
+            var existing = Process.GetProcessesByName(processName);
+            foreach (var process in existing)
+            {
+                try { process.Kill(true); } catch (Exception ex) { _logger.LogWarning(ex, "Failed to kill existing process {Pid}", process.Id); }
+            }
+
+            var m = new Process();
+            m.StartInfo.FileName = processPath;
+            m.StartInfo.WorkingDirectory = Path.GetDirectoryName(processPath) ?? Environment.CurrentDirectory;
+            m.Start();
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "AdminOnly")]
+        public ActionResult Terminate()
+        {
+            var processName = configuration.GetSection("appSettings").GetSection("ServMon:ProcessName").Value;
+            var processes = Process.GetProcessesByName(processName);
+            foreach (var process in processes)
+            {
+                try { process.Kill(true); } catch (Exception ex) { _logger.LogWarning(ex, "Failed to kill process {Pid}", process.Id); }
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Policy = "AdminOnly")]
         public ActionResult EditConfig()
         {
             var configPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ConfigPath").Value);
@@ -101,22 +119,13 @@ namespace ServMonWeb.Controllers
             return View(model);
         }
 
-        //
-        // POST: /Account/ForgotPassword
         [HttpPost]
-        //[ValidateInput(false)]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<ActionResult> EditConfig(EditConfigViewModel model)
         {
             if (ModelState.IsValid)
             {
-                //var user = await UserManager.FindByNameAsync(model.Email);
-                //if (user == null || !(await UserManager.IsEmailConfirmedAsync(user.Id)))
-                //{
-                //    ModelState.AddModelError("", "The user either does not exist or is not confirmed.");
-                //    return View(model);
-                //}
-
                 var configPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ConfigPath").Value);
                 configPath = FileHelper.EvalPath(configPath, false);
 
@@ -124,13 +133,6 @@ namespace ServMonWeb.Controllers
                 FileHelper.WriteFile(model.Content, configPath, Encoding.UTF8);
 
                 return RedirectToAction("Index", "Home");
-
-                // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
-                // Send an email with this link
-                // string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
-                // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);		
-                // await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
-                // return RedirectToAction("ForgotPasswordConfirmation", "Account");
             }
 
             // If we got this far, something failed, redisplay form

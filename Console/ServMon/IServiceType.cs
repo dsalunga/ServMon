@@ -19,5 +19,6 @@ namespace ServMon
         DateTime LastUpdate { get; set; }
         bool Success { get; set; }
         string Message { get; set; }
+        bool AllowInsecureTls { get; set; }
     }
 }

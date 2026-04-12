@@ -76,6 +76,7 @@ namespace ServMon
                     service.ToEmails = XmlUtil.GetValue(node, "ToEmails");
                     service.ToNumbers = XmlUtil.GetValue(node, "ToNumbers");
                     service.EnableSms = DataUtil.GetBool(XmlUtil.GetValue(node, "EnableSms"), true);
+                    service.AllowInsecureTls = DataUtil.GetBool(XmlUtil.GetValue(node, "AllowInsecureTls"), false);
                     Items.Add(service.Name, service);
                 }
             }
