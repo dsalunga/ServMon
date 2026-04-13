@@ -36,3 +36,4 @@ Thumbs.db
 *.dtbcache.json
 
 WebApp/App_Data/
+Console/ServMon/config.xml
