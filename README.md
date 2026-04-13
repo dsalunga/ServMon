@@ -4,17 +4,26 @@ ServMon is a configurable service and endpoint monitor with a background agent a
 
 ## Project layout
 
-- `ServMon.sln`: modern/default solution (`Console/ServMon`, `WebApp`, `Shared/WCMS.Common`, `Shared/WCMS.Common.Tests`)
-- `legacy/ServMon.Legacy.sln`: legacy solution (`legacy/ServMonWebCore`, `legacy/ServMonWeb`, `legacy/ServMonWeb/ServMonWeb.Tests`)
-- `Console/ServMon`: monitoring agent (`net10.0`, cross-platform)
-- `WebApp`: ASP.NET Core MVC UI (`net10.0`, branded `ServMon`; project file `ServMonWeb.csproj`)
-- `Shared/WCMS.Common`: shared utilities (`net10.0`)
-- `Shared/WCMS.Common.Tests`: unit tests (`net10.0`)
-- `legacy/ServMonWebCore`: older ASP.NET Core MVC UI (`net8.0`, legacy, Windows-only)
-- `legacy/ServMonWeb`: legacy ASP.NET MVC 5 app (`.NET Framework 4.8.1`, Windows-only)
-- `legacy/ServMonWeb/ServMonWeb.Tests`: legacy MVC test project (`.NET Framework 4.8.1`, Windows-only)
+### Modern stack (default)
 
-> **Note:** Legacy `.NET Framework` projects under `legacy/` are Windows-only and are not included in the default `ServMon.sln`. They remain as read-only references for audit/history purposes.
+| Path | Purpose | Runtime/Notes |
+|-----|-----|-----|
+| `ServMon.sln` | Default modern solution | Includes `Console/ServMon`, `WebApp`, `Shared/WCMS.Common`, `Shared/WCMS.Common.Tests` |
+| `Console/ServMon` | Monitoring agent | `net10.0`, cross-platform |
+| `WebApp` | ASP.NET Core MVC UI (`ServMonWeb.csproj`) | `net10.0`, branded `ServMon` |
+| `Shared/WCMS.Common` | Shared utilities | `net10.0` |
+| `Shared/WCMS.Common.Tests` | Unit tests for shared utilities | `net10.0` |
+
+### Legacy stack (reference only)
+
+| Path | Purpose | Runtime/Notes |
+|-----|-----|-----|
+| `legacy/ServMon.Legacy.sln` | Legacy-only solution | For legacy maintenance only |
+| `legacy/ServMonWebCore` | Older ASP.NET Core MVC UI | `net8.0`, legacy, Windows-only support path |
+| `legacy/ServMonWeb` | Legacy ASP.NET MVC 5 app | `.NET Framework 4.8.1`, Windows-only |
+| `legacy/ServMonWeb/ServMonWeb.Tests` | Legacy MVC test project | `.NET Framework 4.8.1`, Windows-only |
+
+> Legacy projects under `legacy/` are not part of the default `ServMon.sln` and are kept as read-only reference/history.
 
 ## Prerequisites
 
@@ -35,6 +44,34 @@ dotnet run --project Console/ServMon/ServMon.csproj
 
 # Run tests
 dotnet test ServMon.sln
+```
+
+## First-run setup (fresh environment)
+
+Use this once on a new machine/environment before normal operations.
+
+```bash
+# 1) Set database provider and connection string
+export DatabaseProvider=Postgres
+export ConnectionStrings__PostgresConnection="Host=localhost;Port=5432;Database=servmon;Username=postgres;Password=REPLACE_WITH_DB_PASSWORD"
+
+# 2) Apply EF migrations
+dotnet ef database update --project WebApp/ServMonWeb.csproj
+```
+
+For process-control/config-edit actions, bootstrap an Admin user once, then disable bootstrap immediately:
+
+```bash
+# 3) One-time admin bootstrap
+export BootstrapAdmin__Enabled=true
+export BootstrapAdmin__Email="admin@example.com"
+export BootstrapAdmin__Password="REPLACE_WITH_STRONG_PASSWORD"
+dotnet run --project WebApp/ServMonWeb.csproj
+
+# 4) Disable bootstrap after first successful run
+unset BootstrapAdmin__Enabled
+unset BootstrapAdmin__Email
+unset BootstrapAdmin__Password
 ```
 
 ## Configuration
@@ -88,7 +125,7 @@ Example PostgreSQL override (zsh/bash):
 
 ```bash
 DatabaseProvider=Postgres \
-ConnectionStrings__PostgresConnection="Host=localhost;Port=5432;Database=servmon;Username=postgres;Password=postgres" \
+ConnectionStrings__PostgresConnection="Host=localhost;Port=5432;Database=servmon;Username=postgres;Password=REPLACE_WITH_DB_PASSWORD" \
 dotnet run --project WebApp/ServMonWeb.csproj
 ```
 
@@ -98,6 +135,10 @@ Existing Identity migrations were originally scaffolded for SQL Server.
 With PostgreSQL as the default provider, generate/apply provider-specific PostgreSQL migrations before production use.
 
 ```bash
+# Generate provider-specific migrations when schema changes (recommended separate folders)
+DatabaseProvider=Postgres dotnet ef migrations add <MigrationName> --project WebApp/ServMonWeb.csproj --output-dir Data/Migrations/Postgres
+DatabaseProvider=SqlServer dotnet ef migrations add <MigrationName> --project WebApp/ServMonWeb.csproj --output-dir Data/Migrations/SqlServer
+
 # Apply migrations (default Postgres provider)
 dotnet ef database update --project WebApp/ServMonWeb.csproj
 
@@ -116,6 +157,14 @@ Current trigger mode:
 - Manual only via `workflow_dispatch` (auto `push` / `pull_request` triggers are commented out).
 
 Steps: restore, build, test, publish artifacts.
+
+Manual run options:
+- GitHub UI: `Actions` -> `CI` -> `Run workflow`
+- GitHub CLI:
+
+```bash
+gh workflow run ci.yml --ref master
+```
 
 ## Migration status
 
