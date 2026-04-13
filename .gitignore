@@ -34,3 +34,5 @@ Thumbs.db
 *.tmp
 *.cache
 *.dtbcache.json
+
+WebApp/App_Data/

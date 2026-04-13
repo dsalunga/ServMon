@@ -1,10 +1,10 @@
-﻿@{
+﻿@model ServMonWeb.Models.DashboardViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
     <h1 class="display-4">ServMon Dashboard</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 
 @if (TempData["Error"] != null)
@@ -13,16 +13,22 @@
         @TempData["Error"]
     </div>
 }
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["Success"]
+    </div>
+}
 
 <div class="row">
     <div class="col-md-12">
         @*<h1 class="page-header">ServMon Dashboard</h1>*@
         <div class="btn-group">
-            <button type="button" class="btn btn-@(ViewBag.ServMonRunning ? "success" : "danger") dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                Status: <strong>@(ViewBag.ServMonRunning ? "Running" : "Stopped") </strong> <span class="caret"></span>
+            <button type="button" class="btn btn-@(Model.ServMonRunning ? "success" : "danger") dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                Status: <strong>@(Model.ServMonRunning ? "Running" : "Stopped") </strong> <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
-                @if (ViewBag.ServMonRunning)
+                @if (Model.ServMonRunning)
                 {
                     <li>
                         <form method="post" asp-action="Start" asp-controller="Home" class="d-inline">
@@ -46,9 +52,10 @@
                         </form>
                     </li>
                 }
-                @if (ViewBag.EnableEditConfig)
+                @if (Model.EnableEditConfig)
                 {
                     <li class="divider"></li>
+                    <li><a href="@Url.Action("Services", "Home")" class="dropdown-item"><span class="glyphicon glyphicon-list"></span> Manage Services</a></li>
                     <li><a href="@Url.Action("EditConfig", "Home")" class="dropdown-item"><span class="glyphicon glyphicon-pencil"></span> Edit Config</a></li>
                 }
             </ul>
@@ -68,23 +75,91 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Service</th>
-                        @*<th>URL</th>*@
-                        <th>Status</th>
-                        <th>Last Check</th>
-                        <th>Message</th>
+                        <th><span title="Service">&#9881;</span> Service</th>
+                        <th><span title="Type">&#9681;</span> Type</th>
+                        <th><span title="URL">&#8599;</span> URL</th>
+                        <th><span title="Enabled">&#10003;</span> Enabled</th>
+                        <th><span title="Status">&#9679;</span> Status</th>
+                        <th><span title="Alerts">&#9993;</span> Alerts</th>
+                        <th><span title="Last Check">&#128340;</span> Last Check</th>
+                        <th><span title="Message">&#8505;</span> Message</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.Services != null)
+                    @if (Model.Services.Count == 0)
                     {
-                        @foreach (dynamic service in ViewBag.Services.services)
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">No services configured.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var service in Model.Services)
                         {
                             <tr>
-                                <td>@service.name</td>
-                                <td>@Html.Raw((bool)service.success ? "<span class=\"text-success\">Success</span>" : (bool)service.enabled ? "<span class=\"text-danger\">FAILED</span>" : "<span class=\"text-secondary\">Disabled</span>")</td>
-                                <td>@((bool)service.enabled ? service.lastUpdate : "-")</td>
-                                <td>@service.message</td>
+                                <td>@service.Name</td>
+                                <td>
+                                    @if (service.Type == ServiceTypeOptions.Ftp)
+                                    {
+                                        <span class="badge bg-warning text-dark">FTP</span>
+                                    }
+                                    else if (service.Type == ServiceTypeOptions.Https)
+                                    {
+                                        <span class="badge bg-primary">HTTPS</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info text-dark">HTTP</span>
+                                    }
+                                </td>
+                                <td class="text-break">
+                                    @if (!string.IsNullOrWhiteSpace(service.Url))
+                                    {
+                                        <a href="@service.Url" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                                            @service.Url
+                                        </a>
+                                    }
+                                </td>
+                                <td>
+                                    @if (service.Enabled)
+                                    {
+                                        <span class="text-success fw-bold" title="Enabled">&#10003;</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-secondary fw-bold" title="Disabled">&#10007;</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!service.Enabled)
+                                    {
+                                        <span class="text-secondary fw-bold" title="Disabled">&#9711;</span> <span class="text-secondary">Disabled</span>
+                                    }
+                                    else if (service.HasRuntimeStatus && service.RuntimeSuccess)
+                                    {
+                                        <span class="text-success fw-bold" title="Success">&#9679;</span> <span class="text-success">Success</span>
+                                    }
+                                    else if (service.HasRuntimeStatus)
+                                    {
+                                        <span class="text-danger fw-bold" title="Failed">&#9679;</span> <span class="text-danger">Failed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-warning fw-bold" title="Pending">&#9675;</span> <span class="text-warning">Pending</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(service.ToEmails))
+                                    {
+                                        <span class="badge bg-light text-dark border me-1" title="@service.ToEmails">&#9993; Email</span>
+                                    }
+                                    @if (service.EnableSms && !string.IsNullOrWhiteSpace(service.ToNumbers))
+                                    {
+                                        <span class="badge bg-light text-dark border" title="@service.ToNumbers">&#9742; SMS</span>
+                                    }
+                                </td>
+                                <td>@(service.Enabled && !string.IsNullOrWhiteSpace(service.LastUpdate) ? service.LastUpdate : "-")</td>
+                                <td>@service.Message</td>
                             </tr>
                         }
                     }

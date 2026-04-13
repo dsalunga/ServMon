@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Services>
+  <Settings>
+    <!--<Interval>30</Interval>-->
+    <Interval>1800</Interval>
+    <Mail>
+      <Host>smtp.gmail.com</Host>
+      <Port>587</Port>
+      <From>REPLACE_WITH_SENDER_EMAIL</From>
+      <To>REPLACE_WITH_RECIPIENT_EMAIL</To>
+      <Password>REPLACE_WITH_APP_PASSWORD</Password>
+      <EnableSsl>true</EnableSsl>
+      <IsBodyHtml>true</IsBodyHtml>
+    </Mail>
+    <Sms>
+      <To>REPLACE_WITH_SMS_RECIPIENT</To>
+      <Enabled>true</Enabled>
+      <FromNumber>REPLACE_WITH_SMS_FROM_NUMBER</FromNumber>
+      <FromName>SrvMon</FromName>
+      <Url>https://rest.nexmo.com/sms/json?api_key=REPLACE_API_KEY&amp;api_secret=REPLACE_API_SECRET&amp;from=$(From)&amp;to=$(Number)&amp;text=$(Message)</Url>
+    </Sms>
+  </Settings>
+  <Service>
+    <Name>Some Email Web</Name>
+    <Url>http://mail.someorg.sg</Url>
+    <Type>HTTP</Type>
+    <Enabled>0</Enabled>
+    <Content>Password</Content>
+    <ToEmails>REPLACE_WITH_RECIPIENT_EMAILS</ToEmails>
+    <ToNumbers>
+    </ToNumbers>
+    <EnableSms>true</EnableSms>
+    <!--<Interval>2</Interval>-->
+  </Service>
+  <Service>
+    <Name>Web Portal</Name>
+    <Url>http://someorg.org</Url>
+    <Type>HTTP</Type>
+    <Enabled>0</Enabled>
+    <Content>Sign In</Content>
+  </Service>
+  <Service>
+    <Name>Wikitruth</Name>
+    <Url>https://wikitruth.net</Url>
+    <Type>HTTPS</Type>
+    <Enabled>1</Enabled>
+    <Content>The Wikitruth Project</Content>
+    <EnableSms>false</EnableSms>
+    <AllowInsecureTls>false</AllowInsecureTls>
+  </Service>
+  <Service>
+    <Name>HTTP FTP Web</Name>
+    <Url>http://something.org</Url>
+    <Type>HTTP</Type>
+    <Enabled>0</Enabled>
+    <Content>Description</Content>
+  </Service>
+  <Service>
+    <Name>Some Ftp</Name>
+    <Url>ftp://ftp.someorg.org/pub/SOMETHING/FILES</Url>
+    <Type>FTP</Type>
+    <Enabled>0</Enabled>
+    <Content>Some_Content</Content>
+    <Username>REPLACE_WITH_FTP_USERNAME</Username>
+    <Password>REPLACE_WITH_FTP_PASSWORD</Password>
+  </Service>
+</Services>

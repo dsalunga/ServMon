@@ -1,0 +1,75 @@
+﻿@model ServMonWeb.Models.ServiceConfigListViewModel
+@{
+    ViewData["Title"] = "Manage Services";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Manage Services</h1>
+    <div>
+        <a asp-action="AddService" class="btn btn-primary">Add Service</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["Error"]
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["Success"]
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>URL</th>
+                <th>Enabled</th>
+                <th>Interval</th>
+                <th>SMS</th>
+                <th>Insecure TLS</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Services.Count == 0)
+            {
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">No services configured.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var service in Model.Services)
+                {
+                    <tr>
+                        <td>@service.Name</td>
+                        <td>@service.Type</td>
+                        <td class="text-break">@service.Url</td>
+                        <td>@(service.Enabled ? "Yes" : "No")</td>
+                        <td>@(service.Interval.HasValue ? $"{service.Interval}s" : "-")</td>
+                        <td>@(service.EnableSms ? "Yes" : "No")</td>
+                        <td>@(service.AllowInsecureTls ? "Yes" : "No")</td>
+                        <td class="text-end">
+                            <a asp-action="EditService" asp-route-id="@service.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <form asp-action="DeleteService" asp-route-id="@service.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Delete service &quot;@service.Name&quot;?')">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

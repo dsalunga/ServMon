@@ -1,0 +1,105 @@
+﻿@model ServMonWeb.Models.ServiceConfigEditViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Add Service" : "Edit Service";
+    var actionName = Model.IsNew ? "AddService" : "EditService";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+    <a asp-action="Services" class="btn btn-outline-secondary">Back to Services</a>
+</div>
+
+<form asp-action="@actionName" method="post">
+    @Html.AntiForgeryToken()
+    @if (!Model.IsNew)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
+
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="Type" class="form-label"></label>
+            <select asp-for="Type" class="form-select">
+                @foreach (var type in ServiceTypeOptions.Values)
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+            <span asp-validation-for="Type" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="Interval" class="form-label"></label>
+            <input asp-for="Interval" class="form-control" type="number" min="0" />
+            <span asp-validation-for="Interval" class="text-danger"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Url" class="form-label"></label>
+            <input asp-for="Url" class="form-control" />
+            <span asp-validation-for="Url" class="text-danger"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Content" class="form-label"></label>
+            <input asp-for="Content" class="form-control" />
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="ToEmails" class="form-label"></label>
+            <input asp-for="ToEmails" class="form-control" />
+            <span asp-validation-for="ToEmails" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="ToNumbers" class="form-label"></label>
+            <input asp-for="ToNumbers" class="form-control" />
+            <span asp-validation-for="ToNumbers" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Username" class="form-label"></label>
+            <input asp-for="Username" class="form-control" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-check mt-4">
+                <input asp-for="Enabled" class="form-check-input" />
+                <label asp-for="Enabled" class="form-check-label"></label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-check mt-4">
+                <input asp-for="EnableSms" class="form-check-input" />
+                <label asp-for="EnableSms" class="form-check-label"></label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-check mt-4">
+                <input asp-for="AllowInsecureTls" class="form-check-input" />
+                <label asp-for="AllowInsecureTls" class="form-check-label"></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">@((Model.IsNew) ? "Add Service" : "Save Changes")</button>
+        <a asp-action="Services" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

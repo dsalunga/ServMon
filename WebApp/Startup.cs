@@ -108,7 +108,15 @@ namespace ServMonWeb
 
             using (var scope = app.ApplicationServices.CreateScope())
             {
-                SeedAdminRoleAndUserAsync(scope.ServiceProvider, Configuration).GetAwaiter().GetResult();
+                var logger = scope.ServiceProvider.GetService<ILogger<Startup>>();
+                try
+                {
+                    SeedAdminRoleAndUserAsync(scope.ServiceProvider, Configuration).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogError(ex, "Skipping startup role/user seeding because the identity database is unavailable or not initialized.");
+                }
             }
 
             app.UseEndpoints(endpoints =>
