@@ -49,6 +49,7 @@ Key settings in `WebApp/appsettings.json`:
 | `ServMon:ConfigPath` | Path to the agent's config.xml |
 | `ServMon:ExecutablePath` | Path to the agent executable (no `.exe` extension) |
 | `ServMon:ProcessName` | Process name for agent lifecycle management |
+| `ServMon:PidFilePath` | PID file used to manage only the web-started agent process |
 
 Override any setting via environment variables:
 
@@ -57,6 +58,18 @@ export appSettings__ServMon__ExecutablePath="/custom/path/to/ServMon"
 ```
 
 For legacy Windows config examples, see [docs/migration/legacy-config-examples.md](docs/migration/legacy-config-examples.md).
+
+### One-time admin bootstrap
+
+`WebApp` enforces an `Admin` role for process-control and config-edit endpoints.
+
+- Keep `BootstrapAdmin:Enabled` as `false` by default.
+- For first-time setup only, set:
+  - `BootstrapAdmin__Enabled=true`
+  - `BootstrapAdmin__Email=<admin-email>`
+  - `BootstrapAdmin__Password=<strong-password>`
+- Start the app once to seed the admin user and role.
+- Immediately disable bootstrap again by removing those env vars or setting `BootstrapAdmin__Enabled=false`.
 
 ## Database provider setup (MSSQL + PostgreSQL)
 
@@ -98,6 +111,9 @@ The project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) with
 - `windows-latest`
 - `ubuntu-latest`
 - `macos-latest`
+
+Current trigger mode:
+- Manual only via `workflow_dispatch` (auto `push` / `pull_request` triggers are commented out).
 
 Steps: restore, build, test, publish artifacts.
 

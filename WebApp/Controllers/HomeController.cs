@@ -11,7 +11,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using WCMS.Common.Utilities;
 
 namespace ServMonWeb.Controllers
@@ -78,16 +77,38 @@ namespace ServMonWeb.Controllers
                 return RedirectToAction("Index");
             }
 
-            var existing = Process.GetProcessesByName(processName);
-            foreach (var process in existing)
+            if (!IsAllowedExecutableLocation(processPath))
             {
-                try { process.Kill(true); } catch (Exception ex) { _logger.LogWarning(ex, "Failed to kill existing process {Pid}", process.Id); }
+                _logger.LogError("Agent executable path is outside allowed project root: {Path}", processPath);
+                TempData["Error"] = "Agent executable path is outside the allowed project root.";
+                return RedirectToAction("Index");
+            }
+
+            if (!IsExecutableFile(processPath))
+            {
+                _logger.LogError("Configured agent file is not executable: {Path}", processPath);
+                TempData["Error"] = "Configured agent file is not executable.";
+                return RedirectToAction("Index");
+            }
+
+            var terminated = TerminateManagedProcesses(processName, processPath);
+            if (terminated > 0)
+            {
+                _logger.LogInformation("Stopped {Count} managed agent process(es) before start.", terminated);
             }
 
             var m = new Process();
             m.StartInfo.FileName = processPath;
             m.StartInfo.WorkingDirectory = Path.GetDirectoryName(processPath) ?? Environment.CurrentDirectory;
-            m.Start();
+            m.StartInfo.UseShellExecute = false;
+            if (!m.Start())
+            {
+                _logger.LogError("Failed to start agent process from path: {Path}", processPath);
+                TempData["Error"] = "Failed to start agent process.";
+                return RedirectToAction("Index");
+            }
+
+            WriteManagedPid(m.Id);
 
             return RedirectToAction("Index");
         }
@@ -98,11 +119,10 @@ namespace ServMonWeb.Controllers
         public ActionResult Terminate()
         {
             var processName = configuration.GetSection("appSettings").GetSection("ServMon:ProcessName").Value;
-            var processes = Process.GetProcessesByName(processName);
-            foreach (var process in processes)
-            {
-                try { process.Kill(true); } catch (Exception ex) { _logger.LogWarning(ex, "Failed to kill process {Pid}", process.Id); }
-            }
+
+            var processPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ExecutablePath").Value);
+            var terminated = TerminateManagedProcesses(processName, processPath);
+            _logger.LogInformation("Stopped {Count} managed agent process(es).", terminated);
 
             return RedirectToAction("Index");
         }
@@ -122,7 +142,7 @@ namespace ServMonWeb.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "AdminOnly")]
-        public async Task<ActionResult> EditConfig(EditConfigViewModel model)
+        public ActionResult EditConfig(EditConfigViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -137,6 +157,188 @@ namespace ServMonWeb.Controllers
 
             // If we got this far, something failed, redisplay form
             return View(model);
+        }
+
+        private int TerminateManagedProcesses(string processName, string expectedPath)
+        {
+            var terminated = 0;
+
+            if (TryReadManagedPid(out var pid))
+            {
+                try
+                {
+                    var process = Process.GetProcessById(pid);
+                    if (IsManagedServMonProcess(process, processName, expectedPath))
+                    {
+                        process.Kill(true);
+                        terminated++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Managed PID was not killable: {Pid}", pid);
+                }
+            }
+
+            foreach (var process in Process.GetProcessesByName(processName))
+            {
+                if (!IsManagedServMonProcess(process, processName, expectedPath))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    process.Kill(true);
+                    terminated++;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to kill managed process {Pid}", process.Id);
+                }
+            }
+
+            ClearManagedPid();
+            return terminated;
+        }
+
+        private bool IsManagedServMonProcess(Process process, string expectedName, string expectedPath)
+        {
+            if (process == null || process.HasExited)
+            {
+                return false;
+            }
+
+            if (!string.Equals(process.ProcessName, expectedName, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            try
+            {
+                var actualPath = process.MainModule?.FileName;
+                if (string.IsNullOrWhiteSpace(actualPath))
+                {
+                    return false;
+                }
+
+                var expectedFullPath = Path.GetFullPath(expectedPath);
+                var actualFullPath = Path.GetFullPath(actualPath);
+                return string.Equals(actualFullPath, expectedFullPath, GetPathComparison());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Unable to inspect process executable path for PID {Pid}", process.Id);
+                return false;
+            }
+        }
+
+        private bool IsAllowedExecutableLocation(string processPath)
+        {
+            var fullPath = Path.GetFullPath(processPath);
+            var repoRoot = Directory.GetParent(hostEnvironment.ContentRootPath)?.FullName;
+            if (string.IsNullOrWhiteSpace(repoRoot))
+            {
+                repoRoot = hostEnvironment.ContentRootPath;
+            }
+
+            var rootWithSeparator = Path.GetFullPath(repoRoot) + Path.DirectorySeparatorChar;
+            return fullPath.StartsWith(rootWithSeparator, GetPathComparison());
+        }
+
+        private static bool IsExecutableFile(string processPath)
+        {
+            if (!System.IO.File.Exists(processPath))
+            {
+                return false;
+            }
+
+            if (OperatingSystem.IsWindows())
+            {
+                var ext = Path.GetExtension(processPath);
+                return string.IsNullOrEmpty(ext) || string.Equals(ext, ".exe", StringComparison.OrdinalIgnoreCase);
+            }
+
+            try
+            {
+                var mode = System.IO.File.GetUnixFileMode(processPath);
+                return (mode & (UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute)) != 0;
+            }
+            catch
+            {
+                return true;
+            }
+        }
+
+        private string GetPidFilePath()
+        {
+            var configured = configuration.GetSection("appSettings").GetSection("ServMon:PidFilePath").Value;
+            if (!string.IsNullOrWhiteSpace(configured))
+            {
+                return ResolveConfiguredPath(configured);
+            }
+
+            return Path.Combine(hostEnvironment.ContentRootPath, "App_Data", "servmon-agent.pid");
+        }
+
+        private void WriteManagedPid(int pid)
+        {
+            try
+            {
+                var path = GetPidFilePath();
+                var directory = Path.GetDirectoryName(path);
+                if (!string.IsNullOrWhiteSpace(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+                System.IO.File.WriteAllText(path, pid.ToString(), Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Unable to write managed PID file.");
+            }
+        }
+
+        private bool TryReadManagedPid(out int pid)
+        {
+            pid = 0;
+            try
+            {
+                var path = GetPidFilePath();
+                if (!System.IO.File.Exists(path))
+                {
+                    return false;
+                }
+
+                var text = System.IO.File.ReadAllText(path).Trim();
+                return int.TryParse(text, out pid);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Unable to read managed PID file.");
+                return false;
+            }
+        }
+
+        private void ClearManagedPid()
+        {
+            try
+            {
+                var path = GetPidFilePath();
+                if (System.IO.File.Exists(path))
+                {
+                    System.IO.File.Delete(path);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Unable to clear managed PID file.");
+            }
+        }
+
+        private static StringComparison GetPathComparison()
+        {
+            return OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
         }
 
         private string ResolveConfiguredPath(string configuredPath)

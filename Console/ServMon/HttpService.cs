@@ -28,8 +28,6 @@ namespace ServMon
             _insecureClient = new HttpClient(insecureHandler) { Timeout = DefaultTimeout };
         }
 
-        public bool AllowInsecureTls { get; set; }
-
         public override ServResponse Execute()
         {
             PreExecute();

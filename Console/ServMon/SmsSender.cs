@@ -38,6 +38,10 @@ namespace ServMon
 
                         using var response = _httpClient.PostAsync(requestUrl, null).GetAwaiter().GetResult();
                         var text = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            throw new HttpRequestException($"SMS provider returned HTTP {(int)response.StatusCode} {response.ReasonPhrase}. Response: {text}");
+                        }
                     }
                 }
             }

@@ -2,7 +2,7 @@
 
 This checklist captures code review findings and recommended next steps after the .NET 10 cross-platform migration.
 
-**Status: Implemented (2026-04-12).**
+**Status: Partially implemented (2026-04-13).** Phases 1-4 completed; Phase 5 smoke tests and CI gate still pending.
 
 ## Priority Summary
 

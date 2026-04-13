@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using ServMonWeb.Data;
 using System;
 using System.Collections.Generic;
@@ -105,6 +106,11 @@ namespace ServMonWeb
             app.UseAuthentication();
             app.UseAuthorization();
 
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                SeedAdminRoleAndUserAsync(scope.ServiceProvider, Configuration).GetAwaiter().GetResult();
+            }
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -113,6 +119,66 @@ namespace ServMonWeb
                 endpoints.MapRazorPages();
                 endpoints.MapHealthChecks("/health");
             });
+        }
+
+        private static async Task SeedAdminRoleAndUserAsync(IServiceProvider serviceProvider, IConfiguration configuration)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var logger = serviceProvider.GetService<ILogger<Startup>>();
+
+            const string adminRole = "Admin";
+            if (!await roleManager.RoleExistsAsync(adminRole))
+            {
+                var roleResult = await roleManager.CreateAsync(new IdentityRole(adminRole));
+                if (!roleResult.Succeeded)
+                {
+                    logger?.LogError("Failed to create role {Role}: {Errors}", adminRole, string.Join("; ", roleResult.Errors.Select(e => e.Description)));
+                    return;
+                }
+            }
+
+            var bootstrapSection = configuration.GetSection("BootstrapAdmin");
+            var bootstrapEnabled = bool.TryParse(bootstrapSection["Enabled"], out var parsedEnabled) && parsedEnabled;
+            if (!bootstrapEnabled)
+            {
+                return;
+            }
+
+            var adminEmail = bootstrapSection["Email"];
+            var adminPassword = bootstrapSection["Password"];
+            if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
+            {
+                logger?.LogWarning("BootstrapAdmin is enabled but Email/Password is not configured.");
+                return;
+            }
+
+            var user = await userManager.FindByEmailAsync(adminEmail);
+            if (user == null)
+            {
+                user = new IdentityUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true
+                };
+
+                var createResult = await userManager.CreateAsync(user, adminPassword);
+                if (!createResult.Succeeded)
+                {
+                    logger?.LogError("Failed to create bootstrap admin user {Email}: {Errors}", adminEmail, string.Join("; ", createResult.Errors.Select(e => e.Description)));
+                    return;
+                }
+            }
+
+            if (!await userManager.IsInRoleAsync(user, adminRole))
+            {
+                var addRoleResult = await userManager.AddToRoleAsync(user, adminRole);
+                if (!addRoleResult.Succeeded)
+                {
+                    logger?.LogError("Failed to assign role {Role} to {Email}: {Errors}", adminRole, adminEmail, string.Join("; ", addRoleResult.Errors.Select(e => e.Description)));
+                }
+            }
         }
     }
 }

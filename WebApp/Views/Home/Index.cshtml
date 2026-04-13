@@ -7,6 +7,13 @@
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["Error"]
+    </div>
+}
+
 <div class="row">
     <div class="col-md-12">
         @*<h1 class="page-header">ServMon Dashboard</h1>*@
