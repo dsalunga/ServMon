@@ -24,8 +24,9 @@ namespace ServMon
         public void ReadConfig()
         {
             var servType = typeof(ServTypes);
+            var configPath = EnsureConfigFile("config.xml");
             var xdoc = new XmlDocument();
-            xdoc.Load("config.xml");
+            xdoc.Load(configPath);
             var settingsNode = xdoc.SelectSingleNode("//Services/Settings");
 
             Items = new Dictionary<string, IServiceType>();
@@ -80,6 +81,38 @@ namespace ServMon
                     Items.Add(service.Name, service);
                 }
             }
+        }
+
+        private static string EnsureConfigFile(string configPath)
+        {
+            if (File.Exists(configPath))
+            {
+                return configPath;
+            }
+
+            var configDirectory = Path.GetDirectoryName(configPath);
+            if (string.IsNullOrWhiteSpace(configDirectory))
+            {
+                configDirectory = Environment.CurrentDirectory;
+            }
+
+            var sampleFileName = $"{Path.GetFileNameWithoutExtension(configPath)}.sample{Path.GetExtension(configPath)}";
+            var samplePath = Path.Combine(configDirectory, sampleFileName);
+
+            if (!File.Exists(samplePath))
+            {
+                throw new FileNotFoundException(
+                    $"Configuration file '{configPath}' was not found and sample '{samplePath}' is unavailable.");
+            }
+
+            File.Copy(samplePath, configPath, overwrite: false);
+            Console.WriteLine(
+                "[{0:yyyy-MM-dd HH:mm:ss}] Bootstrapped {1} from {2}. Update placeholder values before production use.",
+                DateTime.Now,
+                Path.GetFileName(configPath),
+                sampleFileName);
+
+            return configPath;
         }
 
         public Dictionary<string, IServiceType> Items { get; set; }

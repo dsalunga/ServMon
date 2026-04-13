@@ -50,6 +50,11 @@ dotnet test ServMon.sln
 
 Use this once on a new machine/environment before normal operations.
 
+`Console/ServMon/config.xml` is intentionally local-only (`.gitignore`).  
+If it is missing, ServMon bootstraps it automatically from `Console/ServMon/config.sample.xml` on first access (console startup or web config/services access).
+
+After bootstrap, review and replace placeholder values in `config.xml` (SMTP, recipients, endpoints, credentials) before production use.
+
 ```bash
 # 1) Set database provider and connection string
 export DatabaseProvider=Postgres

@@ -162,8 +162,7 @@ namespace ServMonWeb.Controllers
         [Authorize(Policy = "AdminOnly")]
         public ActionResult EditConfig()
         {
-            var configPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ConfigPath").Value);
-            configPath = FileHelper.EvalPath(configPath, false);
+            var configPath = GetConfigPath();
 
             var model = new EditConfigViewModel();
             model.Content = FileHelper.ReadFile(configPath);
@@ -178,8 +177,7 @@ namespace ServMonWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                var configPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ConfigPath").Value);
-                configPath = FileHelper.EvalPath(configPath, false);
+                var configPath = GetConfigPath();
 
                 System.IO.File.Copy(configPath, configPath + ".bak", true);
                 FileHelper.WriteFile(model.Content, configPath, Encoding.UTF8);
@@ -395,7 +393,34 @@ namespace ServMonWeb.Controllers
         private string GetConfigPath()
         {
             var configPath = ResolveConfiguredPath(configuration.GetSection("appSettings").GetSection("ServMon:ConfigPath").Value);
-            return FileHelper.EvalPath(configPath, false);
+            configPath = FileHelper.EvalPath(configPath, false);
+            EnsureConfigFileExists(configPath);
+            return configPath;
+        }
+
+        private void EnsureConfigFileExists(string configPath)
+        {
+            if (System.IO.File.Exists(configPath))
+            {
+                return;
+            }
+
+            var directory = Path.GetDirectoryName(configPath) ?? string.Empty;
+            var sampleFileName = $"{Path.GetFileNameWithoutExtension(configPath)}.sample{Path.GetExtension(configPath)}";
+            var samplePath = Path.Combine(directory, sampleFileName);
+
+            if (!System.IO.File.Exists(samplePath))
+            {
+                throw new FileNotFoundException($"Config file '{configPath}' was not found and sample '{samplePath}' is unavailable.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            System.IO.File.Copy(samplePath, configPath, overwrite: false);
+            _logger.LogWarning("Bootstrapped missing config file from sample. ConfigPath={ConfigPath}, SamplePath={SamplePath}", configPath, samplePath);
         }
 
         private sealed class ServiceConfigRecord
