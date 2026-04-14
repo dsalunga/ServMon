@@ -182,7 +182,7 @@ Gate 5:
 - [x] CI workflow created at `.github/workflows/ci.yml`. ✅
 - [ ] Add warnings policy:
   - Fail build on analyzers for in-scope projects after cleanup.
-- [ ] Add basic smoke checks for web and console startup. (Deferred to Phase 7)
+- [x] Add basic smoke checks for web and console startup. ✅ (Implemented via `tests/ServMonWeb.Tests` and included in `dotnet test`)
 
 Done criteria:
 

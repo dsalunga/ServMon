@@ -24,11 +24,21 @@ namespace ServMon
         public int Interval { get; set; }
         public string ToEmails { get; set; }
         public string ToNumbers { get; set; }
+        public int AlertThresholdFailures { get; set; }
+        public int AlertCooldownSeconds { get; set; }
+        public int EscalationThresholdFailures { get; set; }
+        public int EscalationCooldownSeconds { get; set; }
         public DateTime LastUpdate { get; set; }
         public bool Success { get; set; }
         public string Message { get; set; }
         public string StackTrace { get; set; }
         public bool AllowInsecureTls { get; set; }
+        public int CheckCount { get; set; }
+        public int SuccessCount { get; set; }
+        public int FailureCount { get; set; }
+        public int ConsecutiveFailures { get; set; }
+        public long LastDurationMs { get; set; }
+        public double AverageDurationMs { get; set; }
 
         public abstract ServResponse Execute();
 

@@ -16,9 +16,19 @@ namespace ServMon
         int Interval { get; set; }
         string ToEmails { get; set; }
         string ToNumbers { get; set; }
+        int AlertThresholdFailures { get; set; }
+        int AlertCooldownSeconds { get; set; }
+        int EscalationThresholdFailures { get; set; }
+        int EscalationCooldownSeconds { get; set; }
         DateTime LastUpdate { get; set; }
         bool Success { get; set; }
         string Message { get; set; }
         bool AllowInsecureTls { get; set; }
+        int CheckCount { get; set; }
+        int SuccessCount { get; set; }
+        int FailureCount { get; set; }
+        int ConsecutiveFailures { get; set; }
+        long LastDurationMs { get; set; }
+        double AverageDurationMs { get; set; }
     }
 }

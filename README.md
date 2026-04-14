@@ -101,6 +101,42 @@ export appSettings__ServMon__ExecutablePath="/custom/path/to/ServMon"
 
 For legacy Windows config examples, see [docs/migration/legacy-config-examples.md](docs/migration/legacy-config-examples.md).
 
+### `config.xml` validation and env substitution
+
+The console agent validates `config.xml` at startup and fails fast with field-level errors when required values are missing or invalid.
+
+`config.xml` supports environment variable substitution:
+
+- `$(env:VARIABLE_NAME)`
+- `${VARIABLE_NAME}`
+
+Examples:
+
+- `<Password>${SERVMON_SMTP_PASSWORD}</Password>`
+- `<WebhookUrl>$(env:SERVMON_ALERT_WEBHOOK_URL)</WebhookUrl>`
+
+If a referenced environment variable is not set, startup validation reports the exact missing variable and config path.
+
+### Alerting controls
+
+ServMon supports per-service alert thresholds/escalation and optional webhook notifications:
+
+- Global defaults in `/Services/Settings/Alerts`:
+  - `DefaultAlertThresholdFailures`
+  - `DefaultAlertCooldownSeconds`
+  - `DefaultEscalationThresholdFailures`
+  - `DefaultEscalationCooldownSeconds`
+  - `WebhookEnabled`
+  - `WebhookUrl`
+  - `QuietHoursStart` / `QuietHoursEnd` (24-hour `HH:mm`)
+- Per-service overrides in `/Services/Service`:
+  - `AlertThresholdFailures`
+  - `AlertCooldownSeconds`
+  - `EscalationThresholdFailures`
+  - `EscalationCooldownSeconds`
+
+Webhook notifications use JSON payloads compatible with common incoming webhook endpoints (Slack/Teams-style `text` payload).
+
 ### One-time admin bootstrap
 
 `WebApp` enforces an `Admin` role for process-control and config-edit endpoints.
@@ -170,6 +206,15 @@ Manual run options:
 ```bash
 gh workflow run ci.yml --ref master
 ```
+
+## Monitoring APIs
+
+In addition to `/health`, the web app now exposes lightweight JSON monitoring endpoints:
+
+- `GET /api/monitoring/health`
+  - Agent running state + per-service runtime health snapshot
+- `GET /api/monitoring/metrics`
+  - Aggregate check/failure counters and per-service latency/failure metrics
 
 ## Migration status
 

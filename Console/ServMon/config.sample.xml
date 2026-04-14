@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Services>
   <Settings>
     <!--<Interval>30</Interval>-->
@@ -19,6 +19,17 @@
       <FromName>SrvMon</FromName>
       <Url>https://rest.nexmo.com/sms/json?api_key=REPLACE_API_KEY&amp;api_secret=REPLACE_API_SECRET&amp;from=$(From)&amp;to=$(Number)&amp;text=$(Message)</Url>
     </Sms>
+    <Alerts>
+      <DefaultAlertThresholdFailures>1</DefaultAlertThresholdFailures>
+      <DefaultAlertCooldownSeconds>300</DefaultAlertCooldownSeconds>
+      <DefaultEscalationThresholdFailures>5</DefaultEscalationThresholdFailures>
+      <DefaultEscalationCooldownSeconds>900</DefaultEscalationCooldownSeconds>
+      <WebhookEnabled>false</WebhookEnabled>
+      <WebhookUrl>REPLACE_WITH_WEBHOOK_URL</WebhookUrl>
+      <!--<WebhookUrl>${SERVMON_ALERT_WEBHOOK_URL}</WebhookUrl>-->
+      <QuietHoursStart>23:00</QuietHoursStart>
+      <QuietHoursEnd>06:00</QuietHoursEnd>
+    </Alerts>
   </Settings>
   <Service>
     <Name>Some Email Web</Name>
@@ -27,9 +38,12 @@
     <Enabled>0</Enabled>
     <Content>Password</Content>
     <ToEmails>REPLACE_WITH_RECIPIENT_EMAILS</ToEmails>
-    <ToNumbers>
-    </ToNumbers>
+    <ToNumbers></ToNumbers>
     <EnableSms>true</EnableSms>
+    <AlertThresholdFailures>1</AlertThresholdFailures>
+    <EscalationThresholdFailures>3</EscalationThresholdFailures>
+    <AlertCooldownSeconds>300</AlertCooldownSeconds>
+    <EscalationCooldownSeconds>900</EscalationCooldownSeconds>
     <!--<Interval>2</Interval>-->
   </Service>
   <Service>

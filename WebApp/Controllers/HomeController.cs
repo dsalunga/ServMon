@@ -87,11 +87,98 @@ namespace ServMonWeb.Controllers
                     HasRuntimeStatus = runtimeStatus != null,
                     RuntimeSuccess = runtimeStatus?.Success ?? false,
                     LastUpdate = runtimeStatus?.LastUpdate,
-                    Message = message
+                    Message = message,
+                    CheckCount = runtimeStatus?.CheckCount ?? 0,
+                    FailureCount = runtimeStatus?.FailureCount ?? 0,
+                    ConsecutiveFailures = runtimeStatus?.ConsecutiveFailures ?? 0,
+                    LastDurationMs = runtimeStatus?.LastDurationMs ?? 0,
+                    AverageDurationMs = runtimeStatus?.AverageDurationMs ?? 0
                 });
             }
 
             return View(model);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("api/monitoring/health")]
+        public IActionResult MonitoringHealth()
+        {
+            var processName = configuration.GetSection("appSettings").GetSection("ServMon:ProcessName").Value;
+            var runningProcesses = Process.GetProcessesByName(processName);
+            var runtimeStatuses = ReadRuntimeStatuses();
+            var configuredServices = ReadServiceConfigs();
+
+            var payload = new
+            {
+                timestampUtc = DateTimeOffset.UtcNow,
+                agentRunning = runningProcesses.Length > 0,
+                serviceCount = configuredServices.Count,
+                enabledServiceCount = configuredServices.Count(s => s.Enabled),
+                unhealthyServiceCount = configuredServices.Count(s =>
+                {
+                    if (!s.Enabled)
+                    {
+                        return false;
+                    }
+
+                    return runtimeStatuses.TryGetValue(s.Name ?? string.Empty, out var status) && !status.Success;
+                }),
+                services = configuredServices.Select(s =>
+                {
+                    runtimeStatuses.TryGetValue(s.Name ?? string.Empty, out var status);
+                    return new
+                    {
+                        name = s.Name,
+                        enabled = s.Enabled,
+                        type = s.Type,
+                        url = s.Url,
+                        hasRuntimeStatus = status != null,
+                        success = status?.Success,
+                        lastUpdate = status?.LastUpdate,
+                        message = status?.Message,
+                        checkCount = status?.CheckCount ?? 0,
+                        failureCount = status?.FailureCount ?? 0,
+                        consecutiveFailures = status?.ConsecutiveFailures ?? 0,
+                        lastDurationMs = status?.LastDurationMs ?? 0,
+                        averageDurationMs = status?.AverageDurationMs ?? 0
+                    };
+                }).ToList()
+            };
+
+            return Json(payload);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("api/monitoring/metrics")]
+        public IActionResult MonitoringMetrics()
+        {
+            var runtimeStatuses = ReadRuntimeStatuses();
+            var configuredServices = ReadServiceConfigs();
+
+            var metrics = new
+            {
+                timestampUtc = DateTimeOffset.UtcNow,
+                serviceCount = configuredServices.Count,
+                enabledServiceCount = configuredServices.Count(s => s.Enabled),
+                totalChecks = runtimeStatuses.Values.Sum(v => v.CheckCount),
+                totalFailures = runtimeStatuses.Values.Sum(v => v.FailureCount),
+                averageDurationMs = runtimeStatuses.Count == 0 ? 0d : runtimeStatuses.Values.Average(v => v.AverageDurationMs),
+                services = configuredServices.Select(s =>
+                {
+                    runtimeStatuses.TryGetValue(s.Name ?? string.Empty, out var status);
+                    return new
+                    {
+                        name = s.Name,
+                        checkCount = status?.CheckCount ?? 0,
+                        failureCount = status?.FailureCount ?? 0,
+                        consecutiveFailures = status?.ConsecutiveFailures ?? 0,
+                        lastDurationMs = status?.LastDurationMs ?? 0,
+                        averageDurationMs = status?.AverageDurationMs ?? 0
+                    };
+                }).ToList()
+            };
+
+            return Json(metrics);
         }
 
         [HttpPost]
@@ -210,7 +297,11 @@ namespace ServMonWeb.Controllers
                         Interval = s.Interval,
                         Content = s.Content,
                         ToEmails = s.ToEmails,
-                        ToNumbers = s.ToNumbers
+                        ToNumbers = s.ToNumbers,
+                        AlertThresholdFailures = s.AlertThresholdFailures,
+                        AlertCooldownSeconds = s.AlertCooldownSeconds,
+                        EscalationThresholdFailures = s.EscalationThresholdFailures,
+                        EscalationCooldownSeconds = s.EscalationCooldownSeconds
                     }).ToList()
                 };
 
@@ -302,7 +393,11 @@ namespace ServMonWeb.Controllers
                     EnableSms = service.EnableSms,
                     Username = service.Username,
                     Password = string.Empty,
-                    AllowInsecureTls = service.AllowInsecureTls
+                    AllowInsecureTls = service.AllowInsecureTls,
+                    AlertThresholdFailures = service.AlertThresholdFailures,
+                    AlertCooldownSeconds = service.AlertCooldownSeconds,
+                    EscalationThresholdFailures = service.EscalationThresholdFailures,
+                    EscalationCooldownSeconds = service.EscalationCooldownSeconds
                 };
 
                 return View(model);
@@ -438,6 +533,10 @@ namespace ServMonWeb.Controllers
             public string Username { get; set; }
             public string Password { get; set; }
             public bool AllowInsecureTls { get; set; }
+            public int AlertThresholdFailures { get; set; }
+            public int AlertCooldownSeconds { get; set; }
+            public int EscalationThresholdFailures { get; set; }
+            public int EscalationCooldownSeconds { get; set; }
         }
 
         private sealed class RuntimeServiceStatus
@@ -445,6 +544,11 @@ namespace ServMonWeb.Controllers
             public bool Success { get; set; }
             public string LastUpdate { get; set; }
             public string Message { get; set; }
+            public int CheckCount { get; set; }
+            public int FailureCount { get; set; }
+            public int ConsecutiveFailures { get; set; }
+            public long LastDurationMs { get; set; }
+            public double AverageDurationMs { get; set; }
         }
 
         private List<ServiceConfigRecord> ReadServiceConfigs()
@@ -476,7 +580,11 @@ namespace ServMonWeb.Controllers
                     EnableSms = ParseBool(GetNodeValue(node, "EnableSms"), true),
                     Username = GetNodeValue(node, "Username"),
                     Password = GetNodeValue(node, "Password"),
-                    AllowInsecureTls = ParseBool(GetNodeValue(node, "AllowInsecureTls"), false)
+                    AllowInsecureTls = ParseBool(GetNodeValue(node, "AllowInsecureTls"), false),
+                    AlertThresholdFailures = ParseInt(GetNodeValue(node, "AlertThresholdFailures"), 1),
+                    AlertCooldownSeconds = ParseInt(GetNodeValue(node, "AlertCooldownSeconds"), 300),
+                    EscalationThresholdFailures = ParseInt(GetNodeValue(node, "EscalationThresholdFailures"), 5),
+                    EscalationCooldownSeconds = ParseInt(GetNodeValue(node, "EscalationCooldownSeconds"), 900)
                 });
             }
 
@@ -514,7 +622,12 @@ namespace ServMonWeb.Controllers
                     {
                         Success = ParseJTokenBool(token["success"]),
                         LastUpdate = token.Value<string>("lastUpdate"),
-                        Message = token.Value<string>("message")
+                        Message = token.Value<string>("message"),
+                        CheckCount = ParseJTokenInt(token["checkCount"]),
+                        FailureCount = ParseJTokenInt(token["failureCount"]),
+                        ConsecutiveFailures = ParseJTokenInt(token["consecutiveFailures"]),
+                        LastDurationMs = ParseJTokenLong(token["lastDurationMs"]),
+                        AverageDurationMs = ParseJTokenDouble(token["averageDurationMs"])
                     };
                 }
             }
@@ -552,6 +665,36 @@ namespace ServMonWeb.Controllers
             return bool.TryParse(text, out var parsed) ? parsed : defaultValue;
         }
 
+        private static int ParseJTokenInt(JToken token, int defaultValue = 0)
+        {
+            if (token == null)
+            {
+                return defaultValue;
+            }
+
+            return int.TryParse(token.ToString(), out var parsed) ? parsed : defaultValue;
+        }
+
+        private static long ParseJTokenLong(JToken token, long defaultValue = 0)
+        {
+            if (token == null)
+            {
+                return defaultValue;
+            }
+
+            return long.TryParse(token.ToString(), out var parsed) ? parsed : defaultValue;
+        }
+
+        private static double ParseJTokenDouble(JToken token, double defaultValue = 0)
+        {
+            if (token == null)
+            {
+                return defaultValue;
+            }
+
+            return double.TryParse(token.ToString(), out var parsed) ? parsed : defaultValue;
+        }
+
         private void ValidateServiceModel(ServiceConfigEditViewModel model, int? editingId)
         {
             model.Name = (model.Name ?? string.Empty).Trim();
@@ -565,6 +708,11 @@ namespace ServMonWeb.Controllers
             if (!ServiceTypeOptions.Values.Contains(model.Type, StringComparer.OrdinalIgnoreCase))
             {
                 ModelState.AddModelError(nameof(model.Type), "Type must be HTTP, HTTPS, or FTP.");
+            }
+
+            if (model.EscalationThresholdFailures < model.AlertThresholdFailures)
+            {
+                ModelState.AddModelError(nameof(model.EscalationThresholdFailures), "Escalation threshold must be greater than or equal to alert threshold.");
             }
 
             try
@@ -617,6 +765,16 @@ namespace ServMonWeb.Controllers
             }
 
             return null;
+        }
+
+        private static int ParseInt(string value, int defaultValue)
+        {
+            if (int.TryParse(value, out var parsed))
+            {
+                return parsed;
+            }
+
+            return defaultValue;
         }
 
         private static XmlDocument LoadConfigDocument(string configPath)
@@ -686,6 +844,10 @@ namespace ServMonWeb.Controllers
             }
 
             SetNodeValue(document, serviceNode, "AllowInsecureTls", model.AllowInsecureTls ? "true" : "false", removeIfEmpty: false);
+            SetNodeValue(document, serviceNode, "AlertThresholdFailures", model.AlertThresholdFailures.ToString(), removeIfEmpty: false);
+            SetNodeValue(document, serviceNode, "AlertCooldownSeconds", model.AlertCooldownSeconds.ToString(), removeIfEmpty: false);
+            SetNodeValue(document, serviceNode, "EscalationThresholdFailures", model.EscalationThresholdFailures.ToString(), removeIfEmpty: false);
+            SetNodeValue(document, serviceNode, "EscalationCooldownSeconds", model.EscalationCooldownSeconds.ToString(), removeIfEmpty: false);
         }
 
         private int TerminateManagedProcesses(string processName, string expectedPath)

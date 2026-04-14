@@ -35,7 +35,14 @@ namespace ServMon
 
                     using (var smtp = new SmtpClient(settings.Host, settings.Port))
                     {
-                        smtp.Credentials = new NetworkCredential(settings.From, settings.Password);
+                        if (!string.IsNullOrWhiteSpace(settings.Password))
+                        {
+                            smtp.Credentials = new NetworkCredential(settings.From, settings.Password);
+                        }
+                        else
+                        {
+                            smtp.UseDefaultCredentials = true;
+                        }
                         smtp.EnableSsl = settings.EnableSsl;
                         smtp.Send(mail);
                     }

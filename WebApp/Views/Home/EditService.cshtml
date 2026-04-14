@@ -92,6 +92,27 @@
                 <label asp-for="AllowInsecureTls" class="form-check-label"></label>
             </div>
         </div>
+
+        <div class="col-md-3">
+            <label asp-for="AlertThresholdFailures" class="form-label"></label>
+            <input asp-for="AlertThresholdFailures" class="form-control" type="number" min="1" />
+            <span asp-validation-for="AlertThresholdFailures" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="AlertCooldownSeconds" class="form-label"></label>
+            <input asp-for="AlertCooldownSeconds" class="form-control" type="number" min="0" />
+            <span asp-validation-for="AlertCooldownSeconds" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="EscalationThresholdFailures" class="form-label"></label>
+            <input asp-for="EscalationThresholdFailures" class="form-control" type="number" min="1" />
+            <span asp-validation-for="EscalationThresholdFailures" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="EscalationCooldownSeconds" class="form-label"></label>
+            <input asp-for="EscalationCooldownSeconds" class="form-control" type="number" min="0" />
+            <span asp-validation-for="EscalationCooldownSeconds" class="text-danger"></span>
+        </div>
     </div>
 
     <div class="mt-4">

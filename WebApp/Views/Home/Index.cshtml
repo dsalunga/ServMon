@@ -82,6 +82,9 @@
                         <th><span title="Status">&#9679;</span> Status</th>
                         <th><span title="Alerts">&#9993;</span> Alerts</th>
                         <th><span title="Last Check">&#128340;</span> Last Check</th>
+                        <th><span title="Checks">&#128200;</span> Checks</th>
+                        <th><span title="Failures">&#9888;</span> Failures</th>
+                        <th><span title="Latency">&#9201;</span> Latency</th>
                         <th><span title="Message">&#8505;</span> Message</th>
                     </tr>
                 </thead>
@@ -89,7 +92,7 @@
                     @if (Model.Services.Count == 0)
                     {
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">No services configured.</td>
+                            <td colspan="11" class="text-center text-muted py-4">No services configured.</td>
                         </tr>
                     }
                     else
@@ -159,6 +162,26 @@
                                     }
                                 </td>
                                 <td>@(service.Enabled && !string.IsNullOrWhiteSpace(service.LastUpdate) ? service.LastUpdate : "-")</td>
+                                <td>@service.CheckCount</td>
+                                <td>
+                                    @service.FailureCount
+                                    @if (service.ConsecutiveFailures > 0)
+                                    {
+                                        <span class="badge bg-danger ms-1" title="Consecutive failures">x@service.ConsecutiveFailures</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (service.HasRuntimeStatus)
+                                    {
+                                        <span title="@($"Last: {service.LastDurationMs} ms, Avg: {service.AverageDurationMs:0.##} ms")">
+                                            @service.LastDurationMs ms
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
                                 <td>@service.Message</td>
                             </tr>
                         }

@@ -32,6 +32,10 @@ namespace ServMonWeb.Models
         public string Content { get; set; }
         public string ToEmails { get; set; }
         public string ToNumbers { get; set; }
+        public int AlertThresholdFailures { get; set; }
+        public int AlertCooldownSeconds { get; set; }
+        public int EscalationThresholdFailures { get; set; }
+        public int EscalationCooldownSeconds { get; set; }
     }
 
     public class ServiceConfigListViewModel
@@ -84,6 +88,22 @@ namespace ServMonWeb.Models
         [Display(Name = "Allow Insecure TLS (non-production)")]
         public bool AllowInsecureTls { get; set; }
 
+        [Display(Name = "Alert Threshold (failures)")]
+        [Range(1, 9999)]
+        public int AlertThresholdFailures { get; set; } = 1;
+
+        [Display(Name = "Alert Cooldown (seconds)")]
+        [Range(0, 86400)]
+        public int AlertCooldownSeconds { get; set; } = 300;
+
+        [Display(Name = "Escalation Threshold (failures)")]
+        [Range(1, 9999)]
+        public int EscalationThresholdFailures { get; set; } = 5;
+
+        [Display(Name = "Escalation Cooldown (seconds)")]
+        [Range(0, 86400)]
+        public int EscalationCooldownSeconds { get; set; } = 900;
+
         public bool IsNew => !Id.HasValue;
     }
 
@@ -100,6 +120,11 @@ namespace ServMonWeb.Models
         public bool RuntimeSuccess { get; set; }
         public string LastUpdate { get; set; }
         public string Message { get; set; }
+        public int CheckCount { get; set; }
+        public int FailureCount { get; set; }
+        public int ConsecutiveFailures { get; set; }
+        public long LastDurationMs { get; set; }
+        public double AverageDurationMs { get; set; }
     }
 
     public class DashboardViewModel
