@@ -66,3 +66,14 @@ body {
     white-space: nowrap;
     line-height: 60px;
 }
+
+.servmon-nowrap-table > :not(caption) > * > * {
+    white-space: nowrap !important;
+}
+
+.servmon-nowrap-table > :not(caption) > * > .url-cell,
+.servmon-nowrap-table > :not(caption) > * > .url-cell * {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}

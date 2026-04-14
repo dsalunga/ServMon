@@ -72,12 +72,12 @@
     <div class="col-md-12">
         <h3 style="margin-top: 40px">Services Monitoring</h3>
         <div class="table-responsive">
-            <table class="table">
+            <table class="table servmon-nowrap-table">
                 <thead>
                     <tr>
                         <th><span title="Service">&#9881;</span> Service</th>
                         <th><span title="Type">&#9681;</span> Type</th>
-                        <th><span title="URL">&#8599;</span> URL</th>
+                        <th class="url-cell"><span title="URL">&#8599;</span> URL</th>
                         <th><span title="Enabled">&#10003;</span> Enabled</th>
                         <th><span title="Status">&#9679;</span> Status</th>
                         <th><span title="Alerts">&#9993;</span> Alerts</th>
@@ -115,7 +115,7 @@
                                         <span class="badge bg-info text-dark">HTTP</span>
                                     }
                                 </td>
-                                <td class="text-break">
+                                <td class="url-cell">
                                     @if (!string.IsNullOrWhiteSpace(service.Url))
                                     {
                                         <a href="@service.Url" target="_blank" rel="noopener noreferrer" class="text-decoration-none">

@@ -25,12 +25,12 @@
 }
 
 <div class="table-responsive">
-    <table class="table table-striped align-middle">
+    <table class="table table-striped align-middle servmon-nowrap-table">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Type</th>
-                <th>URL</th>
+                <th class="url-cell">URL</th>
                 <th>Enabled</th>
                 <th>Interval</th>
                 <th>SMS</th>
@@ -54,7 +54,7 @@
                     <tr>
                         <td>@service.Name</td>
                         <td>@service.Type</td>
-                        <td class="text-break">@service.Url</td>
+                        <td class="url-cell">@service.Url</td>
                         <td>@(service.Enabled ? "Yes" : "No")</td>
                         <td>@(service.Interval.HasValue ? $"{service.Interval}s" : "-")</td>
                         <td>@(service.EnableSms ? "Yes" : "No")</td>
